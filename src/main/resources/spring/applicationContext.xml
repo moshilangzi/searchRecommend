@@ -9,9 +9,10 @@
         class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:yufei-searchRecommend.properties</value>
+                <value>classpath:baihe-searchRecommend.properties</value>
             </list>
         </property>
     </bean>
-    <import resource="classpath:spring/applicationContext-servlet.xml"/>
+    <!--<import resource="classpath:spring/srservice-servlet.xml"/>-->
+    <import resource="classpath:spring/applicationContext-redis.xml"/>
 </beans>

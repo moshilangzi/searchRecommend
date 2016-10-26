@@ -1,0 +1,182 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.baihe.searchrecommend.elasticsearch;
+
+import com.baihe.searchrecommend.service.UpdateService;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import io.searchbox.client.JestClient;
+import io.searchbox.client.JestClientFactory;
+import io.searchbox.client.JestResult;
+import io.searchbox.client.config.ClientConfig;
+import io.searchbox.client.config.HttpClientConfig;
+import io.searchbox.core.Delete;
+import io.searchbox.core.Index;
+import io.searchbox.core.Update;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author jasstion
+ */
+public class EsUpdateService implements UpdateService {
+
+    final static ResourceBundle solrProperties = ResourceBundle.getBundle("elasticSearch");
+
+    /**
+     *
+     */
+    private static JestClient client = null;
+    private static void populateClient(String elasticSearchUrl) {
+        if (client == null) {
+            Set<String> servers= Sets.newHashSet();
+            String[] servers_str=elasticSearchUrl.split(",");
+            for (String server_str:servers_str){
+                servers.add(server_str);
+            }
+
+
+            HttpClientConfig clientConfig = new HttpClientConfig.Builder(servers).multiThreaded(true).build();
+
+            JestClientFactory factory = new JestClientFactory();
+            factory.setHttpClientConfig(clientConfig);
+            client = factory.getObject();
+        }
+
+    }
+
+    /**
+     *
+     */
+    public EsUpdateService() {
+        String elasticSearchUrl = solrProperties.getString("elasticSearchUrl");
+        populateClient(elasticSearchUrl);
+
+    }
+
+    private void checkParameters(Map<String, String> updateMap) {
+        String id = (String) updateMap.get("id");
+        String type = updateMap.get("type");
+        String index = updateMap.get("index");
+        if (id == null || type == null || index == null) {
+            throw new IllegalArgumentException("updated Info must contains id, type, index field infomation!");
+        }
+
+    }
+
+    /**
+     *
+     * @param updateMap
+     * should make sure the updatedMap contains id field, and also type and index
+     */
+    @Override
+    public void update(Map<String, String> updateMap) {
+        checkParameters(updateMap);
+        String id = (String) updateMap.get("id");
+        String type = updateMap.get("type");
+        String index = updateMap.get("index");
+        String updateScript = generateEsUpdateScriptFromMap(updateMap);
+        Update update = new Update.Builder(updateScript).index(index).type(type).id(id).build();
+
+        try {
+            JestResult jestResult=client.execute(update);
+            processJestResult(jestResult);
+
+        } catch (IOException ex) {
+            Logger.getLogger(EsUpdateService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    /**
+     *
+     * @param updateMap
+     */
+    @Override
+    public void add(Map<String, String> updateMap) {
+        checkParameters(updateMap);
+        String id = (String) updateMap.get("id");
+        String type = updateMap.get("type");
+        String index = updateMap.get("index");
+
+        updateMap.remove("id");
+        updateMap.remove("index");
+        updateMap.remove("type");
+        Index indexAction = new Index.Builder(updateMap).index(index).type(type).id(id).build();
+        try {
+          JestResult jestResult= client.execute(indexAction);
+            processJestResult(jestResult);
+
+        } catch (IOException ex) {
+            throw new RuntimeException("新增数据出错，错误信息："+ex.getMessage()+"");
+        }
+    }
+    private void processJestResult(JestResult jestResult){
+        if(!jestResult.isSucceeded()){
+            throw new RuntimeException("新增数据出错，错误信息："+jestResult.getErrorMessage()+"");
+
+        }
+    }
+    /**
+     *
+     * @param updateMap
+     */
+    @Override
+    public void delete(Map<String, String> deletedMap) {
+        checkParameters(deletedMap);
+        String id = (String) deletedMap.get("id");
+        String type = deletedMap.get("type");
+        String index = deletedMap.get("index");
+        Delete deleteAction = new Delete.Builder(id).index(index).type(type).build();
+        try {
+            JestResult jestResult= client.execute(deleteAction);
+            processJestResult(jestResult);
+
+        } catch (IOException ex) {
+            throw new RuntimeException("删除数据出错，错误信息："+ex.getMessage()+"");
+        }
+
+    }
+
+    /**
+     *
+     * @param updatesMap
+     * @return
+     */
+    protected static String generateEsUpdateScriptFromMap(Map<String, String> updatesMap) {
+        String id = updatesMap.get("id");
+        updatesMap.remove("id");
+        updatesMap.remove("index");
+        updatesMap.remove("type");
+        JsonObject jsonObj = new JsonObject();
+        StringBuffer scriptBuffer = new StringBuffer();
+        JsonObject jsonObject_1 = new JsonObject();
+        for (Map.Entry<String, String> entrySet : updatesMap.entrySet()) {
+            String key = entrySet.getKey();
+            String value = entrySet.getValue();
+            scriptBuffer.append("ctx._source.").append(key).append("=" + key + ";");
+            jsonObject_1.addProperty(key, value);
+
+        }
+        jsonObj.addProperty("script", scriptBuffer.toString());
+
+        jsonObj.add("params", jsonObject_1);
+        //add upsert script
+        //if document no existed, then create document by id given
+        jsonObj.add("upsert", jsonObject_1);
+        return new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(jsonObj);
+
+    }
+
+}

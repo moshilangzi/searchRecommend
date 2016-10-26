@@ -4,10 +4,64 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.yufei</groupId>
+    <groupId>com.baihe</groupId>
     <artifactId>searchRecommend</artifactId>
     <packaging>war</packaging>
     <version>0.0.1-SNAPSHOT</version>
+
+
+    <distributionManagement>
+
+
+</distributionManagement>
+    <repositories>
+        <repository>
+            <id>nexusServer</id>
+            <name>nexus distribution snapshot repository</name>
+            <url>https://mvnrepository.com/artifact/io.netty/netty-handler</url>
+
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>nettyServer</id>
+            <name>nexus distribution snapshot repository</name>
+            <url>https://mvnrepository.com/artifact/io.netty/netty-all</url>
+
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>cloudera</id>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>cloudera</id>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
     <properties>
         <spring.version>3.2.2.RELEASE</spring.version>
         <spring.data.hadoop.version>2.0.4.RELEASE-hadoop24</spring.data.hadoop.version>
@@ -16,7 +70,6 @@
         <ibatis.version>2.3.4.726</ibatis.version>
         <druid.version>1.0.12</druid.version>
         <servlet.version>2.5</servlet.version>
-        <jedis.version>2.6.2</jedis.version>
         <fastjson.version>1.1.43</fastjson.version>
         <slf4j.version>1.6.6</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
@@ -28,13 +81,50 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
-            <groupId>com.yufei</groupId>
-            <artifactId>utils</artifactId>
-            <scope>compile</scope>
-
-            <version>2.0</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-handler -->
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-handler -->
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-handler -->
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+
+
+
+
+
+
+        <dependency>
+            <groupId>com.comm</groupId>
+            <artifactId>basedSearch</artifactId>
+            <version>0.0.1</version>
+
+        </dependency>
+        
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.2.2.Final</version>
+        </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>org.seedstack.addons.elasticsearch</groupId>-->
+            <!--<artifactId>elasticsearch</artifactId>-->
+            <!--<version>2.1.0</version>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>io.searchbox</groupId>
+            <artifactId>jest</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+
+
+
 
     
         <dependency>
@@ -43,7 +133,11 @@
             <version>4.6.0</version>
             <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -143,7 +237,10 @@
                     <groupId>tomcat</groupId>
                     <artifactId>jasper-runtime</artifactId>
                 </exclusion>
-
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -172,6 +269,10 @@
                     <groupId>tomcat</groupId>
                     <artifactId>jasper-runtime</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty</artifactId>
+                </exclusion>
             </exclusions>
 
         </dependency>
@@ -184,11 +285,7 @@
             <version>${spring.data.redis.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>${jedis.version}</version>
-        </dependency>
+
 
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -201,7 +298,12 @@
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/com.github.spullara.mustache.java/compiler -->
+        <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <version>0.8.9</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -220,69 +322,179 @@
 
 
     </dependencies>
+    <profiles>
+        
+        
+        <profile>
+            <id>dev</id>
 
 
-    <build>
+            <build>
 
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
 
 
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-        <finalName>yufei-srservice</finalName>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <finalName>baihe-srservice</finalName>
 
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>properties-maven-plugin</artifactId>
+                        <version>1.0-alpha-2</version>
 
-                <configuration>
+                        <configuration>
 
-                    <files>
-                        <file>src/main/resources/yufei-searchRecommend.properties</file>
-                    </files>
-                </configuration>
-                <executions>
-                    <execution>
-                        <!--<phase>package</phase>-->
-                        <phase>initialize</phase>
+                            <files>
+                                <file>src/main/resources/baihe-searchRecommend.properties</file>
+                            </files>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <!--<phase>package</phase>-->
+                                <phase>initialize</phase>
 
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
+                                <goals>
+                                    <goal>read-project-properties</goal>
+                                </goals>
 
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <version>2.3.2</version>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <skip>false</skip>
-                </configuration>
-            </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-war-plugin</artifactId>-->
-            <!--<version>2.6</version>-->
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <version>2.3.2</version>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>1.7</source>
+                            <target>1.7</target>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                            <skip>false</skip>
+                        </configuration>
+                    </plugin>
+                    <!--<plugin>-->
+                    <!--<groupId>org.apache.maven.plugins</groupId>-->
+                    <!--<artifactId>maven-war-plugin</artifactId>-->
+                    <!--<version>2.6</version>-->
 
-            <!--</plugin>-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4.3</version>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+                    <!--</plugin>-->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.4.3</version>
+                        <configuration>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>product</id>
+            <build>
+
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <excludes>
+                            <exclude>*.*</exclude> 
+                            <exclude>**/**/*.*</exclude>
+         
+                        </excludes> 
+
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+
+                <plugins>
+                   
+                    
+                    <plugin>
+                        <version>2.3.2</version>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>1.6</source>
+                            <target>1.6</target>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                            <skip>false</skip>
+                        </configuration>
+                    </plugin>
+                  
+                    
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.4.3</version>
+                        <configuration>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            
+            <id>product_web</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        
+                        
+
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <finalName>baihe-srservice</finalName>
+
+                <plugins>
+                   
+                    
+                    <plugin>
+                        <version>2.3.2</version>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>1.6</source>
+                            <target>1.6</target>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                            <skip>false</skip>
+                        </configuration>
+                    </plugin>
+                  
+                    
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.4.3</version>
+                        <configuration>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+   
     <name>searchRecommend-trunk</name>
+    <!--<build>-->
+        <!--<plugins>-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-compiler-plugin</artifactId>-->
+                <!--<version>2.3.2</version>-->
+                <!--<configuration>-->
+                    <!--<source>1.7</source>-->
+                    <!--<target>1.7</target>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+        <!--</plugins>-->
+    <!--</build>-->
 </project>

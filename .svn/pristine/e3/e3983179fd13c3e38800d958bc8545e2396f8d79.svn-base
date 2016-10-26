@@ -1,0 +1,137 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.baihe.searchrecommend.elasticsearch;
+
+import com.baihe.searchrecommend.entity.EsBaiheQuery;
+import com.baihe.searchrecommend.entity.QueryItem;
+import com.baihe.searchrecommend.entity.SortItem;
+import com.baihe.searchrecommend.service.QueryGenerator;
+import io.searchbox.core.Search;
+import java.util.List;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ * @author jasstion
+ */
+public class EsQueryGenerator implements QueryGenerator<Search, EsBaiheQuery> {
+
+    protected final static Logger LOGGER = LoggerFactory.getLogger(EsQueryGenerator.class);
+
+    @Override
+    public Search generateFinalQuery(EsBaiheQuery query) {
+        String index = query.getIndex();
+        String type = query.getType();
+        List<String> fls = query.getFls();
+        List<QueryItem> queryItems = query.getQueryItems();
+        List<SortItem> sortItems = query.getSortItems();
+        int pageNum = query.getPageNum();
+        int pageSize = query.getPageSize();
+        if (pageNum < 1) {
+            //default first page
+            pageNum = 1;
+        } else {
+            pageNum = query.getPageNum();
+        }
+
+        final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+        searchSourceBuilder.from((pageNum - 1) * pageSize).size(pageSize);
+
+        for (SortItem sortItem : sortItems) {
+            searchSourceBuilder.sort(sortItem.getFieldName(), sortItem.getSort().trim().equals("asc") ? SortOrder.ASC : SortOrder.DESC);
+
+        }
+        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+
+        for (QueryItem queryItem : queryItems) {
+
+            BoolQueryBuilder tmpBoolQueryBuilder = new BoolQueryBuilder();
+            String fieldName = queryItem.getFieldName();
+            List<String> matchValues = queryItem.getMatchedValues();
+            if (matchValues.size() > 0) {
+                for (String matchValue : matchValues) {
+                    if (matchValue == null || matchValue.trim().length() < 1) {
+                        continue;
+                    }
+
+                    if (matchValue.contains("TO")) {
+                        String bv = null;
+                        String ev = null;
+                        if (matchValue.contains("#")) {
+                            String[] vs = matchValue.split("#");
+                            if (vs.length < 3) {
+                                continue;
+                            }
+                            bv = vs[0];
+                            ev = vs[2];
+                        } else {
+                            String[] vs = matchValue.split("TO");
+                            if (vs.length < 2) {
+                                continue;
+                            }
+                            bv = vs[0];
+                            ev = vs[1];
+                        }
+//                        String[] vs = matchValue.split("#");
+//                        if (vs.length < 3) {
+//                            continue;
+//                        }
+//                        String bv = vs[0];
+//                        String ev = vs[2];
+                        RangeQueryBuilder termQueryBuilder = new RangeQueryBuilder(fieldName);
+                        //range query date query or number query
+                        //2014-02-15T18:59:51Z
+                        if (bv.contains("T")) {
+                            //date range query 
+
+                            termQueryBuilder.format("yyyy-MM-dd'T'HH:mm:ss'Z'").gte(bv).lte(ev);
+                            tmpBoolQueryBuilder.should(termQueryBuilder);
+
+                        } else {
+                            termQueryBuilder.gte(bv).lte(ev);
+
+                        }
+                        tmpBoolQueryBuilder.should(termQueryBuilder);
+
+                    } else {
+
+                        //not range query
+                        TermQueryBuilder termQueryBuilder = new TermQueryBuilder(fieldName, matchValue);
+                        tmpBoolQueryBuilder.should(termQueryBuilder);
+
+                    }
+
+                }
+
+            }
+
+            boolQueryBuilder.must(tmpBoolQueryBuilder);
+
+        }
+        searchSourceBuilder.query(boolQueryBuilder);
+        //apply source field filter
+        //searchSourceBuilder.fields(fls);
+        String[] includeFields = new String[fls.size()];
+        int i = 0;
+        for (String includeField : fls) {
+            includeFields[i++] = includeField;
+        }
+        searchSourceBuilder.fetchSource(includeFields, null);
+        Search search = null;
+        String finalQuery = searchSourceBuilder.toString();
+        LOGGER.debug(finalQuery);
+        search = new Search.Builder(finalQuery).addIndex(index).addType(type).build();
+        return search;
+    }
+
+}

@@ -1,0 +1,40 @@
+package com.baihe.searchrecommend.service;
+
+import com.baihe.searchrecommend.service.impl.EncouterUserRecommender;
+import com.baihe.searchrecommend.service.impl.InterestedUsersRecommender;
+import com.baihe.searchrecommend.service.impl.NearByUserRecommender;
+import com.baihe.searchrecommend.service.impl.SimilarUsersRecommender;
+import com.google.common.collect.Maps;
+import java.util.Map;
+
+/**
+ * Created by jasstion on 15/6/30.
+ */
+public class RecommendFactory {
+
+    public final static Map<String, IRecommend> recommendServiceMap = Maps.newHashMap();
+
+    static {
+        //baihe_recommend_getsimilaruserIds
+        //baihe_recommend_getinteresteduserids
+        recommendServiceMap.put(SimilarUsersRecommender.appKey, new SimilarUsersRecommender());
+        recommendServiceMap.put(InterestedUsersRecommender.appKey, new InterestedUsersRecommender());
+        recommendServiceMap.put(EncouterUserRecommender.appKey, new EncouterUserRecommender());
+        recommendServiceMap.put(NearByUserRecommender.appKey, new NearByUserRecommender());
+
+    }
+
+    public static IRecommend createRecommender(String serviceName) {
+        if (serviceName == null || serviceName.trim().length() < 1) {
+            throw new IllegalArgumentException("serviceName can not be null or empty!");
+        }
+
+        IRecommend recommender = null;
+        recommender = recommendServiceMap.get(serviceName);
+        if (recommender == null) {
+            throw new RuntimeException("" + serviceName + " not existed! ");
+        }
+        return recommender;
+
+    }
+}

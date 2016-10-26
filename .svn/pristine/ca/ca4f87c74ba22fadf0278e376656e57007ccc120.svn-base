@@ -1,0 +1,17 @@
+/**
+ * ��ʼ�����Ա�
+ */
+package com.baihe.searchrecommend.utils;
+
+import java.util.ResourceBundle;
+
+/**
+ * @author Administrator
+ *
+ */
+public class ReadProperties {
+	public static ResourceBundle appBundle;
+	static {
+		appBundle = ResourceBundle.getBundle("baihe-searchRecommend");
+	}
+}

@@ -1,0 +1,137 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.baihe.searchrecommend.service.impl;
+
+import com.baihe.searchrecommend.entity.BaiheQuery;
+import com.baihe.searchrecommend.entity.NearByAppRule;
+import com.baihe.searchrecommend.entity.QueryItem;
+import com.baihe.searchrecommend.entity.RecommendAppRule;
+import com.baihe.searchrecommend.service.IRecommend;
+import static com.baihe.searchrecommend.service.impl.BaseRecommender.appRulesCache;
+import com.baihe.searchrecommend.utils.DateUtil;
+import com.baihe.searchrecommend.utils.Instances;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang.StringUtils;
+
+/**
+ *
+ * @author jasstion
+ */
+public class NearByUserRecommender extends BaseRecommender implements IRecommend<String, Object> {
+
+    public final static String appKey = "3cd264f794efca70d2ee29f10d05d9c7";
+
+    @Override
+    public Map<String, Object> recommend(Map<String, String> paras) {
+
+        NearByAppRule appRule = (NearByAppRule) this.getAppRule(appKey);
+
+        Map<String, Object> resultMap = Maps.newHashMap();
+        List<String> finalUserIds = Lists.newArrayList();
+
+        String userId = paras.get("userId");
+        String countStr = paras.get("count");
+        String pageNumStr = paras.get("pageNum");
+
+        String location = paras.get("location");
+        if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(location)||StringUtils.isEmpty(countStr)||StringUtils.isEmpty(pageNumStr)) {
+            throw new IllegalArgumentException("参数错误！");
+        }
+
+        int count = Integer.parseInt(countStr);
+        int pageNum = Integer.parseInt(pageNumStr);
+        Map<String, String> visitedUserInfo = getUserInfoByUserId(userId);
+        String genderStr = visitedUserInfo.get("gender");
+        if (genderStr == null || genderStr.trim().length() < 1) {
+            throw new RuntimeException("userId:" + userId + " has no gender value!");
+        }
+        int gender = Math.abs(Integer.parseInt(genderStr) - 1);
+        BaiheQuery query = new BaiheQuery();
+
+        List<QueryItem> queryItems = Lists.newArrayList();
+
+        query.setQueryItems(queryItems);
+        query.setPageNum(pageNum);
+        query.setPageSize(count);
+        query.setFls(Lists.newArrayList("userID", "location"));
+        query.setGender(gender);
+        query.setLocationPoint(location);
+        double distance = appRule.getDistance();
+
+        query.setDistance(distance);
+        //最近三个月内有登陆用户过滤
+        if (appRule.isIfFilterByLoginTime()) {
+            //"2014-02-15T18:59:51Z#TO #2015-02-15T18:59:51Z"
+            //"yyyy-MM-dd'T'HH:mm:ss'Z'"
+            String endDateStr = DateUtil.getCurrentDateString(DateUtil.DATE_TIME_TZ);
+            Date begainDate = new Date((long) (System.currentTimeMillis() - 1000 * appRule.getLoginTimeRange()));
+            String begainDateStr = DateUtil.getDateString(begainDate, DateUtil.DATE_TIME_TZ);
+            String rangeDateStr = begainDateStr + "TO" + endDateStr;
+            QueryItem queryItem_date = new QueryItem("lastLoginTime", Lists.newArrayList(rangeDateStr));
+            queryItem_date.setIsFilterType(true);
+            query.getQueryItems().add(queryItem_date);
+
+        }
+        query = this.makeBaiheQuery(query, appRule);
+
+        LOGGER.info("final generated query for user: " + userId + " is: " + query.toString());
+        try {
+            List<Map<String, Object>> finalQueryResults = queryService.processQuery(query);
+            for (Map<String, Object> map : finalQueryResults) {
+                String userID = String.valueOf(map.get("userID"));
+                if (userID == null) {
+                    continue;
+                }
+                userID = userID.replace(".", "").replaceAll("E[\\d]{0,}", "");
+                finalUserIds.add(userID);
+                //finalUserIds.add(userID + ":" + map.get("location"));
+            }
+        } catch (Exception ex) {
+            LOGGER.info("error to query nearBy users for userId:" + userId + ", error message:" + ex.getMessage() + "");
+        }
+
+        resultMap.put("nearByUserIds", finalUserIds);
+
+        return resultMap;
+
+    }
+
+    @Override
+    public void clearAppRuleCache(String appKey) {
+        this.reloadAppRuleCache(appKey);
+    }
+
+    /**
+     *
+     * @param appKey
+     * @return
+     */
+    @Override
+    protected RecommendAppRule getAppRule(String appKey) {
+        NearByAppRule nearByAppRule = (NearByAppRule) appRulesCache.get(appKey);
+        if (nearByAppRule != null) {
+            return nearByAppRule;
+        }
+        LOGGER.info("reload appcache from redis!");
+
+        try {
+            String jsonStr = redisTemplate_String.opsForValue().get(appKey);
+            if (jsonStr == null) {
+                throw new RuntimeException("请配置RecommendAppRule!");
+            }
+            nearByAppRule = Instances.gson.fromJson(jsonStr, NearByAppRule.class);
+        } catch (Exception e) {
+            LOGGER.warn("从redis中获取AppRule失败， 异常：" + e.getMessage() + "");
+        }
+
+        return nearByAppRule;
+    }
+
+}

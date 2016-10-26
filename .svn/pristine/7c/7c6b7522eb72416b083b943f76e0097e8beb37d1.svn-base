@@ -1,0 +1,43 @@
+
+import com.baihe.searchrecommend.entity.BaiheQuery;
+import com.baihe.searchrecommend.service.AbstractQueryService;
+import com.baihe.searchrecommend.service.SearchFactory;
+import com.baihe.searchrecommend.utils.BaiheQueryHelper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.util.List;
+import java.util.Map;
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+/**
+ *
+ * @author jasstion
+ */
+public class Main {
+
+    final static GsonBuilder g = new GsonBuilder();
+
+    final static Gson gson = g.create();
+
+    public static void main(String[] args) throws Exception {
+
+//        Map<String,Object> maps=Maps.newHashMap();
+//        Lis<Map<String,Object>> resultList=Lists.newArrayList();
+//        resultMap.put(null, maps)
+//        maps.put("count", 123);
+//        maps.put("result", maps);
+        String params = "{'cacheStrategy':'20','queryItems':[{'fieldName':'--height','matchedValues':['179']},{'fieldName':'age','matchedValues':['1988','1999']},{'fieldName':'gender','matchedValues':['0']},{'fieldName':'registeDate','matchedValues':['2014-02-15T18:59:51Z#TO+#2015-02-15T18:59:51Z','2009-02-15T18:59:51ZTO2011-02-15T18:59:51Z']}],'gender':0,'pageNum':-1,'pageSize':18,'sortItems':[{'fieldName':'height','sort':'asc'}],'fls':['userID','height']}";
+        AbstractQueryService queryService = SearchFactory.createQueryService();
+        BaiheQuery query = BaiheQueryHelper.makeBaiheQuery(params, null);
+        List<List<Map<String, Object>>> result = queryService.processQuery(query);
+        System.out.print(result.size());
+        
+        
+
+    }
+
+}

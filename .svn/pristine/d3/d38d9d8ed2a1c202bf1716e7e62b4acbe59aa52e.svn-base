@@ -1,0 +1,72 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.baihe.searchrecommend.entity;
+
+import java.io.Serializable;
+
+/**
+ *
+ * @author jasstion
+ */
+public class AppRule implements Serializable{
+    private String appId=null;
+    private String appName=null;
+
+    public AppRule(String appId,String appName) {
+        this.appId=appName;
+        this.appId=appId;
+    }
+
+    public AppRule() {
+        super();
+    }
+    
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 17 * hash + (this.appId != null ? this.appId.hashCode() : 0);
+        hash = 17 * hash + (this.appName != null ? this.appName.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AppRule other = (AppRule) obj;
+        if ((this.appId == null) ? (other.appId != null) : !this.appId.equals(other.appId)) {
+            return false;
+        }
+        if ((this.appName == null) ? (other.appName != null) : !this.appName.equals(other.appName)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+    
+    
+}

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="userCloud:war">
+    <output-path>$USER_HOME$/baihe_work/baihe-userCloud/trunk/target</output-path>
+    <root id="archive" name="baihe-userCloud.war">
+      <element id="artifact" artifact-name="userCloud:war exploded" />
+    </root>
+  </artifact>
+</component>

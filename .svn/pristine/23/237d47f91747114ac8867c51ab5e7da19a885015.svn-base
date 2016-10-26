@@ -1,0 +1,129 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.baihe.searchrecommend.utils;
+
+import com.baihe.searchrecommend.entity.BaiheQuery;
+import com.baihe.searchrecommend.entity.QueryItem;
+import com.baihe.searchrecommend.entity.SearchAppRule;
+import com.baihe.searchrecommend.entity.SortItem;
+import com.baihe.searchrecommend.service.AbstractQueryService;
+import com.baihe.searchrecommend.service.AppRuleAdmin;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import org.springframework.data.redis.core.RedisTemplate;
+
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * used to convert input query into BaiheQuery object
+ *
+ * @author jasstion
+ */
+public class BaiheQueryHelper {
+
+    protected static final RedisTemplate<String, String> redisTemplate = (RedisTemplate<String, String>) SpringUtils.getBeanFromBeanContainer("redisTemplate");
+
+    public static BaiheQuery makeBaiheQuery1(String queryJson, String appKey) {
+
+        Gson gson = new Gson();
+        JsonReader reader = new JsonReader(new StringReader(queryJson));
+        reader.setLenient(true);
+        BaiheQuery query = Instances.gson.fromJson(queryJson, BaiheQuery.class);
+        //get from config database.
+        SearchAppRule searchAppRule = AppRuleAdmin.getSearchAppRule(appKey);
+        String cacheStr = null;
+        String sortStr = null;
+        if (searchAppRule != null) {
+            cacheStr = searchAppRule.getCacheStrategy();
+            sortStr = searchAppRule.getSort();
+        }
+
+        // String filterStr = null;
+        if (cacheStr != null && cacheStr.trim().length() > 0) {
+            query.setCacheStrategy(cacheStr);
+        }
+        if (sortStr != null && sortStr.trim().length() > 0) {
+            List<SortItem> sortItems_ = Instances.gson.fromJson(sortStr, new TypeToken<ArrayList<SortItem>>() {
+            }.getType());
+            query.setSortItems(sortItems_);
+        }
+        final List<QueryItem> queryItems = query.getQueryItems();
+        if (queryItems != null) {
+            for (QueryItem queryItem : queryItems) {
+                if (AbstractQueryService.filterFieldNmae.contains(queryItem.getFieldName())) {
+                    queryItem.setIsFilterType(true);
+                }
+            }
+
+        }
+
+        return query;
+    }
+    public static BaiheQuery makeBaiheQuery(String queryJson, String appKey) {
+        BaiheQuery query = Instances.gson.fromJson(queryJson, BaiheQuery.class);
+        //get from config database.
+        SearchAppRule searchAppRule = AppRuleAdmin.getSearchAppRule(appKey);
+        String cacheStr = null;
+        String sortStr = null;
+        if (searchAppRule != null) {
+            cacheStr = searchAppRule.getCacheStrategy();
+            sortStr = searchAppRule.getSort();
+        }
+
+        // String filterStr = null;
+        if (cacheStr != null && cacheStr.trim().length() > 0) {
+            query.setCacheStrategy(cacheStr);
+        }
+        if (sortStr != null && sortStr.trim().length() > 0) {
+            List<SortItem> sortItems_ = Instances.gson.fromJson(sortStr, new TypeToken<ArrayList<SortItem>>() {
+            }.getType());
+            query.setSortItems(sortItems_);
+        }
+        final List<QueryItem> queryItems = query.getQueryItems();
+        if (queryItems != null) {
+            for (QueryItem queryItem : queryItems) {
+                if (AbstractQueryService.filterFieldNmae.contains(queryItem.getFieldName())) {
+                    queryItem.setIsFilterType(true);
+                }
+            }
+
+        }
+
+        return query;
+    }
+
+
+    @Deprecated
+    public static BaiheQuery makeBaiheQuery(BaiheQuery baiheQuery, String appKey) {
+        SearchAppRule searchAppRule = AppRuleAdmin.getSearchAppRule(appKey);
+        if (searchAppRule != null) {
+            String cacheStr = searchAppRule.getCacheStrategy();
+            String sortStr = searchAppRule.getSort();
+            String filterStr = searchAppRule.getFilter();
+            if (cacheStr != null && cacheStr.trim().length() > 0) {
+                baiheQuery.setCacheStrategy(cacheStr);
+            }
+            if (sortStr != null && sortStr.trim().length() > 0) {
+                List<SortItem> sortItems_ = Instances.gson.fromJson(sortStr, new TypeToken<ArrayList<SortItem>>() {
+                }.getType());
+                baiheQuery.setSortItems(sortItems_);
+            }
+
+            if (filterStr != null && filterStr.trim().length() > 0) {
+                List<QueryItem> filterItems = Instances.gson.fromJson(filterStr, new TypeToken<ArrayList<QueryItem>>() {
+                }.getType());
+                baiheQuery.getQueryItems().addAll(filterItems);
+            }
+
+        }
+
+        return baiheQuery;
+    }
+
+}

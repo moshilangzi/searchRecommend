@@ -1,0 +1,60 @@
+package com.baihe.searchrecommend.service.impl;
+
+import com.baihe.searchrecommend.service.AbstractQueryService;
+import com.baihe.searchrecommend.service.IRecommend;
+import com.baihe.searchrecommend.solr.SolrQueryService;
+import com.google.common.collect.Maps;
+import org.junit.*;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by Administrator on 2015/12/28.
+ */
+public class QianXianUsersRecommenderTest {
+    public QianXianUsersRecommenderTest() {
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() {
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    /**
+     * Test of recommend method, of class QianXianUsersRecommender.
+     */
+    @Test
+    public void testRecommend() {
+
+//        List<SortItem> sortItems = Lists.newArrayList();
+//        SortItem si = new SortItem();
+//        si.setFieldName("lastLoginTime");
+//        si.setSort("desc");
+//        sortItems.add(si);
+//        RecommendAppRule appRule = new RecommendAppRule(QianXianUsersRecommender.appKey,"qianxian","", Instances.gson.toJson(sortItems),"",false,false);
+        String profileUserId = "20000012";
+        Map<String, String> params = Maps.newHashMap();
+        params.put("userID", profileUserId);
+        params.put("count", "10");
+        AbstractQueryService queryService = new SolrQueryService();
+        IRecommend qianXianUsersRecommender = new QianXianUsersRecommender();
+        Map<String, Object> results = qianXianUsersRecommender.recommend(params);
+        List<String> userIds = (List<String>) results.get("qianxianUserIds");
+
+        for (String userId : userIds) {
+            System.out.print(userId + "\n");
+        }
+    }
+}

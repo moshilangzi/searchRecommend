@@ -1,0 +1,47 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.baihe.searchrecommend.entity;
+
+import java.util.List;
+
+/**
+ *
+ * @author jasstion
+ */
+public class EsBaiheQuery extends BaiheQuery {
+    
+    
+    private String index = null;
+    private String type = null;
+
+    public String getIndex() {
+        return index;
+    }
+
+    public void setIndex(String index) {
+        this.index = index;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public EsBaiheQuery() {
+        super();
+    }
+
+    public EsBaiheQuery(List queryItems, int pageNum, int pageSize, List<SortItem> sortItems, List<String> fls, String index, String type) {
+        super(queryItems, pageNum, pageSize, sortItems, fls);
+        this.index = index;
+        this.type = type;
+
+    }
+
+}

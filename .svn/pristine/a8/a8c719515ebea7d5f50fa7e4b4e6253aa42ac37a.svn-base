@@ -1,0 +1,115 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.baihe.searchrecommend.elasticsearch;
+
+import com.baihe.searchrecommend.service.UpdateService;
+import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.Map;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+/**
+ *
+ * @author jasstion
+ */
+public class EsUpdateServiceTest {
+
+    public EsUpdateServiceTest() {
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() {
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    /**
+     * Test of update method, of class EsUpdateService.
+     */
+    @Test
+    public void testUpdate() throws IOException {
+        String testId = "111111";
+        Map<String, String> updatedMap = Maps.newHashMap();
+        updatedMap.put("age", "1920");
+        updatedMap.put("height", "1920");
+        updatedMap.put("nickname", "jasstion2");
+        updatedMap.put("id", testId);
+        updatedMap.put("type", "user");
+        updatedMap.put("index", "baihe");
+        UpdateService updaeService = new EsUpdateService();
+        //UpdateService updaeService = new EsUpdateService("http://120.131.7.145:9200/");
+
+        updaeService.update(updatedMap);
+
+       
+
+    }
+
+    /**
+     * Test of add method, of class EsUpdateService.
+     */
+    @Test
+    public void testAdd() throws IOException {
+
+        String testId = "111112";
+        Map<String, String> updatedMap = Maps.newHashMap();
+        updatedMap.put("age", "1999");
+        updatedMap.put("height", "1999");
+        updatedMap.put("nickname", "jasstion2");
+        updatedMap.put("id", testId);
+        updatedMap.put("type", "user");
+        updatedMap.put("index", "baihe");
+        UpdateService updaeService = new EsUpdateService();
+        updaeService.add(updatedMap);
+
+//        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+//        searchSourceBuilder.query(QueryBuilders.idsQuery("user").ids(testId));
+//        Search search = (Search) new Search.Builder(searchSourceBuilder.toString())
+//                // multiple index or types can be added..
+//                .addIndex("baihe")
+//                .build();
+//        JestResult result1 =JestMain.client.execute(search);
+//        System.out.println(result1.getJsonString());
+
+    }
+
+    /**
+     * Test of delete method, of class EsUpdateService.
+     */
+    @Test
+    public void testDelete() {
+    }
+
+    /**
+     * Test of generateEsUpdateScriptFromMap method, of class EsUpdateService.
+     */
+    @Test
+    public void testGenerateEsUpdateScriptFromMap() {
+        Map<String, String> updatedMap = Maps.newHashMap();
+        updatedMap.put("age", "1991");
+        updatedMap.put("height", "1991");
+        updatedMap.put("nickname", "jasstion");
+
+        String source_json = EsUpdateService.generateEsUpdateScriptFromMap(updatedMap);
+        System.out.print(source_json + "\n");
+
+    }
+
+}
