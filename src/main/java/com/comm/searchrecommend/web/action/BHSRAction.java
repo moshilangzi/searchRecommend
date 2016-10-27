@@ -4,13 +4,16 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.comm.searchrecommend.entity.ThreadShardEntity;
 import com.comm.searchrecommend.service.BasedSearchService;
 import com.comm.searchrecommend.service.IRecommend;
 import com.comm.searchrecommend.service.RecommendFactory;
 import com.comm.searchrecommend.service.SearchServiceFactory;
 import com.comm.searchrecommend.utils.HttpUtils;
+import com.comm.searchrecommend.utils.ThreadLocalHelper;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -95,6 +98,13 @@ public class BHSRAction {
 
     @RequestMapping(value = "/search")
     public void search(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        UUID uuid = UUID.randomUUID();
+        //每次服务请求对应的唯一id
+        String uuidStr = uuid.toString();
+        ThreadLocal<ThreadShardEntity> threadShardEntity = new ThreadLocal<ThreadShardEntity>();
+        ThreadShardEntity threadShardEntity_=new ThreadShardEntity(uuidStr);
+        threadShardEntity.set(threadShardEntity_);
+
         int code = 200;
         String msg = "正常调用";
         Object data = null;
@@ -126,6 +136,7 @@ public class BHSRAction {
             LOGGER.info("搜索服务调用失败，具体异常信息是：" + msg + "");
         }
         printJsonTemplate(code, msg, data, request, response);
+        threadShardEntity.remove();
     }
 
 
@@ -137,9 +148,13 @@ public class BHSRAction {
         result.put("traceID", request.getParameter("traceID"));
         result.put("code", code);
         result.put("msg", msg);
-        UUID uuid = UUID.randomUUID();
-        //每次服务请求对应的唯一id
-        String uuidStr = uuid.toString();
+        ThreadShardEntity threadShardEntity=null;
+        try {
+             threadShardEntity= ThreadLocalHelper.getThreadShardEntity();
+        } catch (Exception e) {
+            LOGGER.info("error to access threadShardEntity, message is: "+ ExceptionUtils.getMessage(e.getCause())+"");
+        }
+        String uuidStr =threadShardEntity.getSearchId();
         result.put("uuid",uuidStr);
         result.put("data", (data != null) ? data : new JSONObject());
 

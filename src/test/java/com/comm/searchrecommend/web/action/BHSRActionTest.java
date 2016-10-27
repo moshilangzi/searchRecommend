@@ -10,7 +10,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.comm.basedSearch.entity.CommonQuery;
 import com.comm.basedSearch.service.AbstractQueryService;
 import com.comm.searchrecommend.service.SearchServiceFactory;
-import com.comm.searchrecommend.utils.BaiheQueryHelper;
 import com.comm.searchrecommend.utils.HttpUtils;
 import org.junit.*;
 
@@ -99,7 +98,7 @@ public class BHSRActionTest {
         }
 
         AbstractQueryService queryService = SearchServiceFactory.createQueryService();
-        CommonQuery query = BaiheQueryHelper.makeBaiheQuery(queryStr, appKey);
+        CommonQuery query = null;//BaiheQueryHelper.makeBaiheQuery(queryStr, appKey);
         data = queryService.processQuery(query);
         for (Map<String, Object> data1 : data) {
             System.out.println(data1.get("userID") + ": " + data1.get("height") + "" + "\n");
