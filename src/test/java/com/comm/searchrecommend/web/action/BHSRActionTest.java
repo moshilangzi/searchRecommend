@@ -98,7 +98,7 @@ public class BHSRActionTest {
         }
 
         AbstractQueryService queryService = SearchServiceFactory.createQueryService();
-        CommonQuery query = null;//BaiheQueryHelper.makeBaiheQuery(queryStr, appKey);
+        CommonQuery query = null;//commQueryHelper.makecommQuery(queryStr, appKey);
         data = queryService.processQuery(query);
         for (Map<String, Object> data1 : data) {
             System.out.println(data1.get("userID") + ": " + data1.get("height") + "" + "\n");

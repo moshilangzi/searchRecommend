@@ -57,7 +57,7 @@ public class SolrUpdateServiceTest {
             updatedMap.put("height", "1999");
             updatedMap.put("nickname", "jasstion4143");
             updatedMap.put("userID", userID);
-            updatedMap.put("collectionName", "baiheSearchMain_woman");
+            updatedMap.put("collectionName", "commSearchMain_woman");
             updatedMap.put("location", "45.15,-93.857");
             updateService.update(updatedMap);
 
@@ -68,7 +68,7 @@ public class SolrUpdateServiceTest {
             updatedMap.put("height", "1999");
             updatedMap.put("nickname", "jasstion21514");
             updatedMap.put("userID", userID);
-            updatedMap.put("collectionName", "baiheSearchMain_woman");
+            updatedMap.put("collectionName", "commSearchMain_woman");
             updatedMap.put("location", "45.17614,-13.87341");
             updateService.update(updatedMap);
 
@@ -79,7 +79,7 @@ public class SolrUpdateServiceTest {
             updatedMap.put("height", "1999");
             updatedMap.put("nickname", "jasstion316134");
             updatedMap.put("userID", userID);
-            updatedMap.put("collectionName", "baiheSearchMain_woman");
+            updatedMap.put("collectionName", "commSearchMain_woman");
             updatedMap.put("location", "2.17614,-13.87341");
             updateService.update(updatedMap);
 
@@ -107,19 +107,19 @@ public class SolrUpdateServiceTest {
             String userID = "51";
             updatedMap.put("id", userID);
 
-            updatedMap.put("collectionName", "baiheSearchMain_woman");
+            updatedMap.put("collectionName", "commSearchMain_woman");
             updateService.delete(updatedMap);
             updatedMap = Maps.newHashMap();
             userID = "2";
             updatedMap.put("id", userID);
 
-            updatedMap.put("collectionName", "baiheSearchMain_woman");
+            updatedMap.put("collectionName", "commSearchMain_woman");
             updateService.delete(updatedMap);
             updatedMap = Maps.newHashMap();
             userID = "3";
             updatedMap.put("id", userID);
 
-            updatedMap.put("collectionName", "baiheSearchMain_woman");
+            updatedMap.put("collectionName", "commSearchMain_woman");
             updateService.delete(updatedMap);
         } catch (MalformedURLException ex) {
             Logger.getLogger(SolrUpdateServiceTest.class.getName()).log(Level.SEVERE, null, ex);

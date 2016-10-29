@@ -169,7 +169,7 @@ public class BHSRAction {
 
         String params_="{\"cacheStrategy\":null,\"distance\":null,\"fls\":[\"userID\",\"score\",\"age\",\"height\",\"registeDate\"],\"functionQuerysList\":[],\"gender\":-1,\"locationPoint\":null,\"pageNum\":1,\"pageSize\":10,\"queryItems\":[{\"fieldName\":\"height\",\"isFilterType\":false,\"matchedValues\":[\"158#TO #159\",\"178#TO# 179\"]},{\"fieldName\":\"age\",\"isFilterType\":false,\"matchedValues\":[\"1988\",\"1999\"]},{\"fieldName\":\"gender\",\"isFilterType\":true,\"matchedValues\":[\"0\"]},{\"fieldName\":\"registeDate\",\"isFilterType\":true,\"matchedValues\":[\"2014-02-15T18:59:51Z#TO #2015-02-15T18:59:51Z\",\"2009-02-15T18:59:51Z#TO #2011-02-15T18:59:51Z\"]}],\"sortItems\":[{\"fieldName\":\"age\",\"sort\":\"desc\"},{\"fieldName\":\"height\",\"sort\":\"desc\"},{\"fieldName\":\"registeDate\",\"sort\":\"desc\"}]}";
         final String userID = "130106652";
-        String url = "http://srservice1.baihe.com/inner/searchRecommend/search.json";
+        String url = "http://srservice1.comm.com/inner/searchRecommend/search.json";
         Map<String, Object> params = Maps.newHashMap();
         params.put("params", params_);
         params.put("APIKey", "1BJUTYXAQA6LS9796PZ7ET8P0X9KT1J1");

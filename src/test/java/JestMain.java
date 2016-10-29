@@ -46,7 +46,7 @@ public class JestMain {
         source.put("age", 1988);
         source.put("userID", 5672334);
 
-        Index index = new Index.Builder(source).index("baihe").type("user").id("5672334").build();
+        Index index = new Index.Builder(source).index("comm").type("user").id("5672334").build();
         client.execute(index);
 
         source.clear();
@@ -57,7 +57,7 @@ public class JestMain {
         source.put("userID", 567234);
         source.put("id", 567234);
 
-        index = new Index.Builder(source).index("baihe").type("user").build();
+        index = new Index.Builder(source).index("comm").type("user").build();
         client.execute(index);
 
     }
@@ -72,9 +72,9 @@ public class JestMain {
 //        List<QueryItem> queryItems = Lists.newArrayList();
 //        QueryItem queryItem = new QueryItem("id", Lists.newArrayList("AVHx2cBqXMEzvqfnenVE"));
 //        queryItems.add(queryItem);
-//        EsCommonQuery esBaiheQuery = new EsCommonQuery(queryItems, 1, 10, Lists.newArrayList(), Lists.newArrayList("age", "height"), "baihe", "user");
+//        EsCommonQuery escommQuery = new EsCommonQuery(queryItems, 1, 10, Lists.newArrayList(), Lists.newArrayList("age", "height"), "comm", "user");
 //        EsQueryService eqs = new EsQueryService();
-//        List<Map<String, Object>> result = eqs.query(esBaiheQuery);
+//        List<Map<String, Object>> result = eqs.query(escommQuery);
 //        System.out.println(result.size());
 //        Map<String, Object> source = Maps.newHashMap();
 //        source.put("registeDate", new Date());
@@ -95,13 +95,13 @@ public class JestMain {
         
         String source_json = generateEsUpdateScriptFromMap(updatedMap);
         String updateScript =  "{\"script\" : \"ctx._source.nickname=nickname;ctx._source.city=city; ctx._source.height=height;ctx._source.age=age\",\"params\" : {\"city\": 864102,\"age\":1988,\"height\":199, \"nickname\":\"jasstion1\"},\"upsert\":{\"id\":\"99999\"}}";//
-        Update update = new Update.Builder(updateScript).index("baihe").type("user").id("111111").build();
+        Update update = new Update.Builder(updateScript).index("comm").type("user").id("111111").build();
        // client.execute(update);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.idsQuery("user").ids("111111"));
         Search search = (Search) new Search.Builder(searchSourceBuilder.toString())
                 // multiple index or types can be added..
-                .addIndex("baihe")
+                .addIndex("comm")
                 .build();
         JestResult result1 = client.execute(search);
         System.out.println(result1.getJsonString());

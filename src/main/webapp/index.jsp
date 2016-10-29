@@ -5,7 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>test</title>
 
-        <script src="http://static4.baihe.com/3rd-lib/jquery-1.8.3.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="http://static4.comm.com/3rd-lib/jquery-1.8.3.min.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript">
             $(function () {
 

@@ -17,7 +17,7 @@
     <!-- spring加载log4j时，会设置整个jvm中的属性，默认的rootKey都一样，多个项目会引发rootKey冲突，请自己设置一个，可使用项目名称作为rootKey -->
     <context-param>
         <param-name>webAppRootKey</param-name>
-        <param-value>baihe-sr.root</param-value>
+        <param-value>comm-sr.root</param-value>
     </context-param>
     <listener>
         <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>

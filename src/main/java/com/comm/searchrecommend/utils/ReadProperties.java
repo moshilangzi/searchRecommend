@@ -12,6 +12,6 @@ import java.util.ResourceBundle;
 public class ReadProperties {
 	public static ResourceBundle appBundle;
 	static {
-		appBundle = ResourceBundle.getBundle("baihe-searchRecommend");
+		appBundle = ResourceBundle.getBundle("comm-searchRecommend");
 	}
 }

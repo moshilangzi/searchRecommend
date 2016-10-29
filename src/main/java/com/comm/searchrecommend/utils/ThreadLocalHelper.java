@@ -36,13 +36,15 @@ public class ThreadLocalHelper {
     }
 
 public static void main(String[] args) throws Exception {
+    ThreadLocal<String> threadLocalStr = new ThreadLocal<String>();
+    threadLocalStr.set("string threadLocal value");
+
     UUID uuid = UUID.randomUUID();
     //每次服务请求对应的唯一id
     String uuidStr = uuid.toString();
     ThreadLocal<ThreadShardEntity> threadShardEntity = new ThreadLocal<ThreadShardEntity>();
     ThreadShardEntity threadShardEntity_=new ThreadShardEntity(uuidStr);
     threadShardEntity.set(threadShardEntity_);
-
 
 
     Thread otherThread = Thread.currentThread(); // get a reference to the otherThread somehow (this is just for demo)
@@ -58,9 +60,9 @@ public static void main(String[] args) throws Exception {
     Field valueField = Class.forName("java.lang.ThreadLocal$ThreadLocalMap$Entry").getDeclaredField("value");
     valueField.setAccessible(true);
     ThreadShardEntity value = (ThreadShardEntity)valueField.get(entry);
-
+    String strValue=(String)valueField.get(entry);
     System.out.print(value.getSearchId());
-
+    System.out.print(strValue);
 }
 
 

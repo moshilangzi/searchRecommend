@@ -144,17 +144,17 @@ public class EsTestSearchServiceTest {
 
         List<SortItem> sortItems = Lists.newArrayList();
         //logstash-2015.12.10 log4j
-        //EsCommonQuery baiheQuery = new EsCommonQuery(items, 1, 18, sortItems, fls, "baihe_user", "user");
-        EsCommonQuery baiheQuery = new EsCommonQuery(items, 1, 5, sortItems, fls, indexName, typeName);
-        baiheQuery.setSubQuery(subQuery);
-        baiheQuery.setScoreScript("100*_score");
+        //EsCommonQuery commQuery = new EsCommonQuery(items, 1, 18, sortItems, fls, "comm_user", "user");
+        EsCommonQuery commQuery = new EsCommonQuery(items, 1, 5, sortItems, fls, indexName, typeName);
+        commQuery.setSubQuery(subQuery);
+        commQuery.setScoreScript("100*_score");
 
 
         EsQueryService esQueryService=new EsQueryService(client);
         SearchServiceRule searchServiceRule=new SearchServiceRule();
 
         EsTestSearchService esTestSearchService=new EsTestSearchService(esQueryService,searchServiceRule);
-        String queryStr= GsonHelper.objToJson(baiheQuery);
+        String queryStr= GsonHelper.objToJson(commQuery);
         m_log.info(queryStr);
 
 
