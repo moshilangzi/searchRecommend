@@ -1,6 +1,7 @@
 package com.comm.sr.common.utils;
 
 
+import com.google.common.collect.Maps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 
 public class DateUtil
 {
-	final static Map<String,String> monthMap=new HashMap<>();
+	final static Map<String,String> monthMap= Maps.newHashMap();
 	static{
 		monthMap.put("January", "01");
 		monthMap.put("February", "02");

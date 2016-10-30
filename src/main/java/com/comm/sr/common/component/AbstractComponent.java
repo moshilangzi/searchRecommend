@@ -9,11 +9,11 @@ import java.util.Properties;
  */
 public abstract class AbstractComponent {
     protected final Properties settings;
-    protected final SrLogger srLogger;
+    protected final SrLogger logger;
 
     public AbstractComponent(Properties settings) {
         this.settings=settings;
-        srLogger=null;
+        logger=null;
 
 
     }

@@ -6,8 +6,6 @@ import com.comm.sr.common.entity.SearchServiceRule;
 import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.utils.GsonHelper;
 import com.google.gson.reflect.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -21,7 +19,6 @@ import java.util.Properties;
  * Created by jasstion on 23/10/2016.
  */
 public abstract class BasedSearchService<A extends AbstractQueryService,Q extends CommonQuery, SR extends SearchServiceRule, R2> extends AbstractComponent implements Serializable {
-    protected final static Logger m_log = LoggerFactory.getLogger(BasedSearchService.class);
     protected AbstractQueryService queryService=null;
     protected SR serviceRule=null;
 

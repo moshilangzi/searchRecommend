@@ -14,8 +14,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +36,6 @@ public abstract class AbstractQueryService<Q extends AbstractQuery> extends Abst
    protected Properties settings;
     protected CacheService<String,String> cacheService;
 
-    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractQueryService.class);
     public static Set<String> filterFieldNmae = Sets.newHashSet("shape", "residencepProvince", "province", "education", "corporationNature", "industry", "income", "loveType", "matchIncome", "lastLoginDate");
 
     public AbstractQueryService(CacheService<String,String> cacheService,Properties settings) {
@@ -122,7 +119,7 @@ public abstract class AbstractQueryService<Q extends AbstractQuery> extends Abst
     }
 
     public void recordQueryLog(QueryStatistics queryStatistics) {
-        LOGGER.info(queryStatistics.toString());
+        logger.info(queryStatistics.toString());
 
     }
 

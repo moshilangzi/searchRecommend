@@ -15,8 +15,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.search.SearchHit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -29,7 +27,6 @@ import java.util.Properties;
  */
 public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
 
-    protected final static Logger LOGGER = LoggerFactory.getLogger(EsQueryService.class);
     private Properties settings=null;
     private TransportClient client=null;
 
@@ -46,7 +43,7 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
                 try {
                     client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host.split(":")[0]), Integer.parseInt(host.split(":")[1])));
                 } catch (Exception e) {
-                    LOGGER.error("error to get elasticsearch client!");
+                    logger.error("error to get elasticsearch client!");
                 }
 
             }
