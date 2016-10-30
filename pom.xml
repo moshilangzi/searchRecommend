@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.baihe</groupId>
+    <groupId>com.comm</groupId>
     <artifactId>searchRecommend</artifactId>
     <packaging>war</packaging>
     <version>0.0.1-SNAPSHOT</version>
@@ -77,6 +77,15 @@
         <junit.version>4.10</junit.version>
         <kafka.version>0.8.1.1</kafka.version>
         <maven-compiler-plugin>2.3.2</maven-compiler-plugin>
+
+
+
+        <jedis.version>2.6.2</jedis.version>
+
+        <solr.version>4.6.0</solr.version>
+        <elasticsearch.version>2.4.1</elasticsearch.version>
+        <fastjson.version>1.1.43</fastjson.version>
+        <jest.version>2.0.0</jest.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -94,16 +103,81 @@
         <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
 
 
+        <dependency>
+            <groupId>org.elasticsearch.plugin</groupId>
+            <artifactId>lang-javascript</artifactId>
+            <version>2.4.1-SNAPSHOT</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.2.2.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.plugin</groupId>
+
+            <artifactId>elastic-payload</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
 
 
         <dependency>
-            <groupId>com.comm</groupId>
-            <artifactId>basedSearch</artifactId>
-            <version>0.0.1</version>
-
+            <groupId>io.searchbox</groupId>
+            <artifactId>jest</artifactId>
+            <version>${jest.version}</version>
         </dependency>
+
+
+
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj</artifactId>
+            <version>${solr.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
+        </dependency>
+
+
+        <!--<dependency>-->
+            <!--<groupId>com.comm</groupId>-->
+            <!--<artifactId>basedSearch</artifactId>-->
+            <!--<version>0.0.1</version>-->
+
+        <!--</dependency>-->
         
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -416,8 +490,8 @@
                         <version>2.3.2</version>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
-                            <source>1.6</source>
-                            <target>1.6</target>
+                            <source>1.8</source>
+                            <target>1.8</target>
                             <encoding>${project.build.sourceEncoding}</encoding>
                             <skip>false</skip>
                         </configuration>
@@ -461,8 +535,8 @@
                         <version>2.3.2</version>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
-                            <source>1.6</source>
-                            <target>1.6</target>
+                            <source>1.8</source>
+                            <target>1.8</target>
                             <encoding>${project.build.sourceEncoding}</encoding>
                             <skip>false</skip>
                         </configuration>
