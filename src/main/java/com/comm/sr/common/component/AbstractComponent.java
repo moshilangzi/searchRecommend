@@ -1,6 +1,8 @@
 package com.comm.sr.common.component;
 
+import com.comm.sr.common.logging.Log4jSrLogger;
 import com.comm.sr.common.logging.SrLogger;
+import org.apache.log4j.Logger;
 
 import java.util.Properties;
 
@@ -13,7 +15,7 @@ public abstract class AbstractComponent {
 
     public AbstractComponent(Properties settings) {
         this.settings=settings;
-        logger=null;
+        logger=new Log4jSrLogger("", Logger.getLogger(getClass()));
 
 
     }

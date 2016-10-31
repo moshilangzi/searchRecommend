@@ -49,8 +49,8 @@ public class EsQueryGeneratorTest {
         String indexName="com";
         String typeName="user";
         List<QueryItem> items = Lists.newArrayList();
-        QueryItem queryItem=new QueryItem("des",Lists.newArrayList("box"));
-        queryItem.setIsPayload(true);
+//        QueryItem queryItem=new QueryItem("des",Lists.newArrayList("box"));
+//        queryItem.setIsPayload(true);
         // items.add(queryItem);
         SubQuery subQuery=new SubQuery();
         subQuery.setLogic("OR");

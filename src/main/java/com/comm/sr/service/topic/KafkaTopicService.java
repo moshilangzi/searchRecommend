@@ -37,8 +37,8 @@ public class KafkaTopicService extends AbstractComponent implements TopicService
         KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic,null, message);
 
         producer.send(data);
-        if(srLogger.isDebugEnabled()){
-            srLogger.debug("succeed to send message[{}]",data);
+        if(logger.isDebugEnabled()){
+            logger.debug("succeed to send message[{}]",data);
         }
 
     }
@@ -51,12 +51,12 @@ public class KafkaTopicService extends AbstractComponent implements TopicService
 
     public static void main(String[] args){
         Properties props=new Properties();
-        props.put("metadata.broker.list", "123.56.28.195:9092");
+        props.put("metadata.broker.list", "127.0.0.1:32773");
         props.put("serializer.class", "kafka.serializer.StringEncoder");
 
        // props.put("request.required.acks", "1");
         TopicService topicService=new KafkaTopicService(props);
-        topicService.publishTopicMessage("vcg-search-log","this is my first message!");
+        topicService.publishTopicMessage("my-replicated-topic_4","this is my first message!");
 
 
 

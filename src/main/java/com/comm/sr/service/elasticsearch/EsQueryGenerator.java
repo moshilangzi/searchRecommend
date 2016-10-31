@@ -265,15 +265,17 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
     private void makeFinalBoolQuery(SubQuery query, final BoolQueryBuilder boolQueryBuilder) {
         QueryItem queryItem=query.getQueryItem();
         List<SubQuery> subQuerys = query.getSubQuerys();
-
-
-        if (!subQuerys.isEmpty()) {
-            int length = subQuerys.size();
-           //
-          //  tempBoolQueryBuilder=new BoolQueryBuilder();
+        if(queryItem!=null&&subQuerys!=null){
             makeBoolQuery(queryItem, boolQueryBuilder);
-            //boolQueryBuilder.must(tempBoolQueryBuilder);
+        }
+
+
+        if (subQuerys!=null&&!subQuerys.isEmpty()) {
+            int length = subQuerys.size();
+
             BoolQueryBuilder tempBoolQueryBuilder=new BoolQueryBuilder();
+
+
 
             for (int i = 0; i < subQuerys.size(); i++) {
 
@@ -298,7 +300,10 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
 
         } else {
            // BoolQueryBuilder tempBoolQueryBuilder=new BoolQueryBuilder();
-            makeBoolQuery(queryItem, boolQueryBuilder);
+            if(queryItem!=null){
+                makeBoolQuery(queryItem, boolQueryBuilder);
+            }
+
 
            // boolQueryBuilder.must(tempBoolQueryBuilder);
 
