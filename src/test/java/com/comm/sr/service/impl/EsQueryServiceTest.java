@@ -144,7 +144,7 @@ public class EsQueryServiceTest {
                 .execute().actionGet();
         client.prepareIndex(indexName, typeName, "5")
                 .setSource(XContentFactory.jsonBuilder().startObject()
-                                .field("des", "boss|100 box |10.0 basket|100")
+                                .field("des", "10.0 basket|100")
                                 .field("name","jack award")
                                 .field("age",123000)
                                 .field("userId",5)
@@ -178,6 +178,13 @@ public class EsQueryServiceTest {
         SubQuery subQuery1=new SubQuery("NOT",queryItem1 );
         subQuery1.setSubQuerys(Lists.newArrayList(new SubQuery("AND", new QueryItem("age", Lists.newArrayList("1220TO1230")))));
         subQueries.add(subQuery1);
+        SubQuery subQuery2=new SubQuery();
+        subQuery2.setLogic("OR");
+        SubQuery subQuery3=new SubQuery();
+        subQuery3.setQueryItem(new QueryItem("des",Lists.newArrayList("boss","box")));
+
+        subQuery2.setSubQuerys(Lists.newArrayList(subQuery3));
+        subQuery1.getSubQuerys().add(subQuery2);
         subQuery.setSubQuerys(subQueries);
 
 
