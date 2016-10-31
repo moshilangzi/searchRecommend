@@ -8,7 +8,9 @@ package com.comm.sr.service.solr;
 
 import com.comm.sr.common.entity.QueryItem;
 import com.comm.sr.common.entity.SubQuery;
+import com.comm.sr.common.utils.Instances;
 import com.comm.sr.service.QueryGenerator;
+import com.google.common.collect.Lists;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +42,7 @@ public class AdvancedSolrQueryGenerator implements QueryGenerator<SolrQuery, Sub
         String logic = query.getLogic();
         List<SubQuery> subQuerys = query.getSubQuerys();
 
-        if (!subQuerys.isEmpty()) {
+        if (subQuerys!=null&&!subQuerys.isEmpty()) {
             solrQueryBuffer.append("( ");
             int length = subQuerys.size();
             for (int i = 0; i < subQuerys.size(); i++) {
@@ -54,7 +56,10 @@ public class AdvancedSolrQueryGenerator implements QueryGenerator<SolrQuery, Sub
             solrQueryBuffer.append(" )");
 
         } else {
-            solrQueryBuffer.append(generateQueryStrFromQueryItem(queryItem.getFieldName(), queryItem.getMatchedValues()));
+            if(queryItem!=null){
+                solrQueryBuffer.append(generateQueryStrFromQueryItem(queryItem.getFieldName(), queryItem.getMatchedValues()));
+
+            }
         }
 
         //finally 
@@ -113,26 +118,38 @@ public class AdvancedSolrQueryGenerator implements QueryGenerator<SolrQuery, Sub
     }
 
     public static void main(String[] args) {
-//        SubQuery ageQuery = new SubQuery();
-//        ageQuery.setFieldName("age");
-//        ageQuery.setMatchedValues(Lists.newArrayList("1988"));
-//        SubQuery heightQuery = new SubQuery();
-//        heightQuery.setFieldName("height");
-//        heightQuery.setMatchedValues(Lists.newArrayList("180"));
-//        SubQuery finalQuery = new SubQuery();
-//        finalQuery.setLogic("OR");
-//        finalQuery.getSubQuerys().add(ageQuery);
-//        finalQuery.getSubQuerys().add(heightQuery);
-//        SubQuery sexQuery = new SubQuery();
-//        sexQuery.setFieldName("sex");
-//        sexQuery.setMatchedValues(Lists.newArrayList("1"));
-//
-//        SubQuery finalQuery_ = new SubQuery();
-//        finalQuery_.setLogic("AND");
-//        finalQuery_.getSubQuerys().add(finalQuery);
-//        finalQuery_.getSubQuerys().add(sexQuery);
-//        LOGGER.info(Instances.gson.toJson(finalQuery_) + "\n");
-//        new AdvancedSolrQueryGenerator().generateFinalQuery(finalQuery_);
+        SubQuery ageQuery = new SubQuery();
+        QueryItem ageQueryItem=new QueryItem();
+        ageQueryItem.setFieldName("age");
+        ageQueryItem.setMatchedValues(Lists.newArrayList("1988"));
+        ageQuery.setQueryItem(ageQueryItem);
+        SubQuery heightQuery = new SubQuery();
+        QueryItem heightQueryItem=new QueryItem();
+
+        heightQueryItem.setFieldName("height");
+        heightQueryItem.setMatchedValues(Lists.newArrayList("180"));
+        heightQuery.setQueryItem(heightQueryItem);
+        SubQuery finalQuery = new SubQuery();
+        finalQuery.setLogic("OR");
+        List<SubQuery> subQueries=Lists.newArrayList();
+        finalQuery.setSubQuerys(subQueries);
+        finalQuery.getSubQuerys().add(ageQuery);
+        finalQuery.getSubQuerys().add(heightQuery);
+        SubQuery sexQuery = new SubQuery();
+        QueryItem sexQueryItem=new QueryItem();
+
+        sexQueryItem.setFieldName("sex");
+        sexQueryItem.setMatchedValues(Lists.newArrayList("1"));
+        sexQuery.setQueryItem(sexQueryItem);
+
+        SubQuery finalQuery_ = new SubQuery();
+        finalQuery_.setLogic("AND");
+        List<SubQuery> subQueries_=Lists.newArrayList();
+        finalQuery_.setSubQuerys(subQueries_);
+        finalQuery_.getSubQuerys().add(finalQuery);
+        finalQuery_.getSubQuerys().add(sexQuery);
+        LOGGER.info(Instances.gson.toJson(finalQuery_) + "\n");
+        new AdvancedSolrQueryGenerator().generateFinalQuery(finalQuery_);
 
     }
 }

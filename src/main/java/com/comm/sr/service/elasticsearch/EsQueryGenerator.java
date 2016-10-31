@@ -9,7 +9,9 @@ import com.comm.sr.common.entity.EsCommonQuery;
 import com.comm.sr.common.entity.QueryItem;
 import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
+import com.comm.sr.common.utils.Instances;
 import com.comm.sr.service.QueryGenerator;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.geo.GeoDistance;
@@ -57,11 +59,13 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         searchSourceBuilder.from((pageNum - 1) * pageSize).size(pageSize);
+        if(sortItems!=null){
+            for (SortItem sortItem : sortItems) {
+                searchSourceBuilder.sort(sortItem.getFieldName(), sortItem.getSort().trim().equals("asc") ? SortOrder.ASC : SortOrder.DESC);
 
-        for (SortItem sortItem : sortItems) {
-            searchSourceBuilder.sort(sortItem.getFieldName(), sortItem.getSort().trim().equals("asc") ? SortOrder.ASC : SortOrder.DESC);
-
+            }
         }
+
 
 
         String location = query.getLocationPoint();
@@ -79,14 +83,17 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         }
         BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
         //解析queryItems
-        for (QueryItem queryItem : queryItems) {
+        if(queryItems!=null){
+            for (QueryItem queryItem : queryItems) {
 
-            BoolQueryBuilder tmpBoolQueryBuilder = new BoolQueryBuilder();
-            makeBoolQuery(queryItem, tmpBoolQueryBuilder);
+                BoolQueryBuilder tmpBoolQueryBuilder = new BoolQueryBuilder();
+                makeBoolQuery(queryItem, tmpBoolQueryBuilder);
 
-            boolQueryBuilder.must(tmpBoolQueryBuilder);
+                boolQueryBuilder.must(tmpBoolQueryBuilder);
 
+            }
         }
+
         //解析subQuery
         SubQuery subQuery=query.getSubQuery();
         if(subQuery!=null){
@@ -256,46 +263,40 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         this.typeName = typeName;
     }
 }
-    public static void main(String[] args){
-        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
 
-
-
-    }
     private void makeFinalBoolQuery(SubQuery query, final BoolQueryBuilder boolQueryBuilder) {
         QueryItem queryItem=query.getQueryItem();
         List<SubQuery> subQuerys = query.getSubQuerys();
-        if(queryItem!=null&&subQuerys!=null){
-            makeBoolQuery(queryItem, boolQueryBuilder);
-        }
+
 
 
         if (subQuerys!=null&&!subQuerys.isEmpty()) {
             int length = subQuerys.size();
 
-            BoolQueryBuilder tempBoolQueryBuilder=new BoolQueryBuilder();
+
 
 
 
             for (int i = 0; i < subQuerys.size(); i++) {
 
-
+                BoolQueryBuilder tempBoolQueryBuilder=new BoolQueryBuilder();
                     makeFinalBoolQuery(subQuerys.get(i),tempBoolQueryBuilder);
+                if(query.getLogic().equals("AND")){
+                    boolQueryBuilder.must(tempBoolQueryBuilder);
+
+                }
+                if(query.getLogic().equals("OR")){
+                    boolQueryBuilder.should(tempBoolQueryBuilder);
+
+                }
+                if(query.getLogic().equals("NOT")){
+                    boolQueryBuilder.mustNot(tempBoolQueryBuilder);
+
+                }
 
 
             }
-            if(query.getLogic().equals("AND")){
-                boolQueryBuilder.must(tempBoolQueryBuilder);
 
-            }
-            if(query.getLogic().equals("OR")){
-                boolQueryBuilder.should(tempBoolQueryBuilder);
-
-            }
-            if(query.getLogic().equals("NOT")){
-                boolQueryBuilder.mustNot(tempBoolQueryBuilder);
-
-            }
 
 
         } else {
@@ -314,5 +315,44 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         }
 
         //finally
+    }
+    public static void main(String[] args) {
+        SubQuery ageQuery = new SubQuery();
+        QueryItem ageQueryItem=new QueryItem();
+        ageQueryItem.setFieldName("age");
+        ageQueryItem.setMatchedValues(Lists.newArrayList("1988"));
+        ageQuery.setQueryItem(ageQueryItem);
+        SubQuery heightQuery = new SubQuery();
+        QueryItem heightQueryItem=new QueryItem();
+
+        heightQueryItem.setFieldName("height");
+        heightQueryItem.setMatchedValues(Lists.newArrayList("180"));
+        heightQuery.setQueryItem(heightQueryItem);
+        SubQuery finalQuery = new SubQuery();
+        finalQuery.setLogic("OR");
+        List<SubQuery> subQueries=Lists.newArrayList();
+        finalQuery.setSubQuerys(subQueries);
+        finalQuery.getSubQuerys().add(ageQuery);
+        finalQuery.getSubQuerys().add(heightQuery);
+        SubQuery sexQuery = new SubQuery();
+        QueryItem sexQueryItem=new QueryItem();
+
+        sexQueryItem.setFieldName("sex");
+        sexQueryItem.setMatchedValues(Lists.newArrayList("1"));
+        sexQuery.setQueryItem(sexQueryItem);
+
+        SubQuery finalQuery_ = new SubQuery();
+        finalQuery_.setLogic("AND");
+        List<SubQuery> subQueries_=Lists.newArrayList();
+        finalQuery_.setSubQuerys(subQueries_);
+        finalQuery_.getSubQuerys().add(finalQuery);
+        finalQuery_.getSubQuerys().add(sexQuery);
+        LOGGER.info(Instances.gson.toJson(finalQuery_) + "\n");
+
+        EsCommonQuery esCommonQuery = new EsCommonQuery(null, 1, 5, null, Lists.newArrayList(), "test", "test");
+        esCommonQuery.setSubQuery(finalQuery_);
+
+        String query=new EsQueryGenerator().generateFinalQuery(esCommonQuery).getSearchSourceBuilder().toString();
+        System.out.print(query);
     }
 }
