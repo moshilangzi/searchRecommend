@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="war" name="userToSolr:war">
-    <output-path>$PROJECT_DIR$/../userToSolr/target</output-path>
-    <root id="archive" name="baihe-userToSolr.war">
-      <element id="artifact" artifact-name="userToSolr:war exploded" />
-    </root>
-  </artifact>
-</component>
