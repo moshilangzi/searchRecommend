@@ -37,14 +37,14 @@ public class AdvancedSolrQueryServiceTest {
     }
 
     /**
-     * Test of processQuery method, of class AdvancedSolrQueryService.
+     * Test of processQuery method, of class SolrQueryService.
      */
     @Test
     public void testProcessQuery() {
     }
 
     /**
-     * Test of query method, of class AdvancedSolrQueryService.
+     * Test of query method, of class SolrQueryService.
      */
     @Test
     public void testQuery() throws Exception {

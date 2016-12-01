@@ -6,8 +6,8 @@
 package com.comm.sr.service.impl;
 
 import com.comm.sr.NodeTestUtils;
-import com.comm.sr.service.UpdateService;
-import com.comm.sr.service.elasticsearch.EsUpdateService;
+import com.comm.sr.common.core.UpdateService;
+import com.comm.sr.common.elasticsearch.EsUpdateService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.junit.*;

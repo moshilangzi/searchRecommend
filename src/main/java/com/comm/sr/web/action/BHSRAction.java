@@ -5,9 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.comm.sr.common.entity.ThreadShardEntity;
-import com.comm.sr.service.BasedSearchService;
-import com.comm.sr.service.IRecommend;
-import com.comm.sr.service.RecommendFactory;
+import com.comm.sr.service.search.BasedSearchService;
 import com.comm.sr.service.SearchServiceFactory;
 import com.comm.sr.common.utils.HttpUtils;
 import com.comm.sr.common.utils.ThreadLocalHelper;
@@ -50,8 +48,8 @@ public class BHSRAction {
                 Map<String, String> paraMap = JSON.parseObject(params, new TypeReference<Map<String, String>>() {
                 });
                 String appKey = paraMap.get("appKey");
-                IRecommend iRecommend = RecommendFactory.createRecommender(appKey);
-                data = iRecommend.recommend(paraMap);
+//                IRecommend iRecommend = RecommendFactory.createRecommender(appKey);
+//                data = iRecommend.recommend(paraMap);
 
             } else {
                 code = -100;
@@ -80,8 +78,8 @@ public class BHSRAction {
                 Map<String, String> paraMap = JSON.parseObject(params, new TypeReference<Map<String, String>>() {
                 });
                 String appKey = paraMap.get("appKey");
-                IRecommend iRecommend = RecommendFactory.createRecommender(appKey);
-                iRecommend.clearAppRuleCache(appKey);
+//                IRecommend iRecommend = RecommendFactory.createRecommender(appKey);
+//                iRecommend.clearAppRuleCache(appKey);
 
             } else {
                 code = -100;

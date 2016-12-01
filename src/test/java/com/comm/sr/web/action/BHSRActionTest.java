@@ -8,7 +8,7 @@ package com.comm.sr.web.action;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.comm.sr.common.entity.CommonQuery;
-import com.comm.sr.service.AbstractQueryService;
+import com.comm.sr.common.core.AbstractQueryService;
 import com.comm.sr.common.utils.HttpUtils;
 import org.junit.*;
 

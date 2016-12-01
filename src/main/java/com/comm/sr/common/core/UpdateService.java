@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.comm.sr.service;
+package com.comm.sr.common.core;
 
 import java.util.Map;
 

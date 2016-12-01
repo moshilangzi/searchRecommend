@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.comm.sr.service.solr;
+package com.comm.sr.common.solr;
 
-import com.comm.sr.service.UpdateService;
+import com.comm.sr.common.core.UpdateService;
 import com.google.common.collect.Maps;
 import org.apache.http.client.HttpClient;
 import org.apache.solr.client.solrj.SolrServerException;

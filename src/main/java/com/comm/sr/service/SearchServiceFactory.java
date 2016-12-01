@@ -6,9 +6,13 @@
 package com.comm.sr.service;
 
 
-import com.comm.sr.service.elasticsearch.EsQueryService;
+import com.comm.sr.common.core.AbstractQueryService;
+import com.comm.sr.common.elasticsearch.EsQueryService;
 import com.comm.sr.common.entity.SearchServiceRule;
-import com.comm.sr.service.impl.EsTestSearchService;
+import com.comm.sr.service.search.BasedSearchService;
+import com.comm.sr.service.search.EsTestSearchService;
+import com.comm.sr.service.topic.KafkaTopicService;
+import com.comm.sr.service.topic.TopicService;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -27,6 +31,7 @@ public class SearchServiceFactory {
     final public static Map<String,BasedSearchService>  srServices= Maps.newHashMap();
 
     static {
+
         SearchServiceRule searchServiceRule=new SearchServiceRule();
         Properties settings=new Properties();
         try {
@@ -36,9 +41,10 @@ public class SearchServiceFactory {
 
 
         }
+        TopicService topicService=new KafkaTopicService(settings);
         AbstractQueryService searchService=new EsQueryService(settings,null);
 
-        srServices.put("esTest",new EsTestSearchService(searchService,searchServiceRule,settings));
+        srServices.put("esTest",new EsTestSearchService(searchService,searchServiceRule,settings,topicService));
     }
 
     public static void main(String[] args){

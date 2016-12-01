@@ -3,14 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.comm.sr.service.elasticsearch;
+package com.comm.sr.common.elasticsearch;
 
 
+import com.comm.sr.common.core.AbstractQueryService;
 import com.comm.sr.common.entity.EsCommonQuery;
-import com.comm.sr.service.AbstractQueryService;
 import com.comm.sr.service.cache.CacheService;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.time.StopWatch;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
@@ -59,36 +58,7 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
 
     }
 
-    @Override
-    public List<Map<String, Object>> processQuery(EsCommonQuery baiheQuery) throws Exception {
-        long timeTaken = 0;
-        boolean cacheHit = false;
-        List<Map<String, Object>> queryResult = null;
-        StopWatch stopWatch = new StopWatch();
 
-        // Start the watch, do some task and stop the watch.
-        stopWatch.start();
-
-        queryResult = this.queryCache(baiheQuery);
-        if (queryResult != null && queryResult.size() > 1) {
-            cacheHit = true;
-            AbstractQueryService.QueryStatistics queryStatistics = new QueryStatistics(timeTaken, cacheHit);
-            stopWatch.stop();
-            timeTaken = stopWatch.getTime();
-            this.recordQueryLog(queryStatistics);
-            return queryResult;
-        }
-        cacheHit = false;
-        queryResult = this.query(baiheQuery);
-        stopWatch.stop();
-        timeTaken = stopWatch.getTime();
-
-        AbstractQueryService.QueryStatistics queryStatistics = new QueryStatistics(timeTaken, cacheHit);
-        this.recordQueryLog(queryStatistics);
-        this.cacheQueryResult(baiheQuery, queryResult);
-
-        return queryResult;
-    }
 
     @Override
     public List<Map<String, Object>> query(EsCommonQuery baiheQuery) throws Exception {

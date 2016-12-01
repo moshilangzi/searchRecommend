@@ -5,8 +5,8 @@
  */
 package com.comm.sr.solr;
 
-import com.comm.sr.service.UpdateService;
-import com.comm.sr.service.solr.SolrUpdateService;
+import com.comm.sr.common.core.UpdateService;
+import com.comm.sr.common.solr.SolrUpdateService;
 import com.google.common.collect.Maps;
 import org.junit.*;
 

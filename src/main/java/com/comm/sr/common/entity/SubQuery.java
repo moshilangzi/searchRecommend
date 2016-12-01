@@ -18,7 +18,7 @@ import java.util.List;
 public class SubQuery implements Serializable {
 
     //AND or OR or NOT
-    private String logic = "AND";
+    private String logic = null;
     private List<SubQuery> subQuerys =null;
     private QueryItem queryItem=null;
 
@@ -95,6 +95,7 @@ public class SubQuery implements Serializable {
 
     public static void main(String[] args) {
         SubQuery finalQuery=new SubQuery();
+        finalQuery.setLogic("AND");
         List<SubQuery> subQueries=Lists.newArrayList();
         SubQuery ageQuery = new SubQuery();
         QueryItem age=new QueryItem();

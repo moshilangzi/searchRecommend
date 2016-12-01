@@ -3,13 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.comm.sr.service.solr;
+package com.comm.sr.common.solr;
 
 
 import com.comm.sr.common.entity.QueryItem;
+import com.comm.sr.common.entity.SolrCommonQuery;
+import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
 import com.comm.sr.common.utils.Instances;
-import com.comm.sr.service.QueryGenerator;
+import com.comm.sr.common.core.QueryGenerator;
 import com.google.common.collect.Lists;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.slf4j.Logger;
@@ -21,19 +23,88 @@ import java.util.List;
  *
  * @author jasstion
  */
-public class AdvancedSolrQueryGenerator implements QueryGenerator<SolrQuery, SubQuery> {
+public class SolrQueryGenerator implements QueryGenerator<SolrQuery, SolrCommonQuery> {
 
-    protected final static Logger LOGGER = LoggerFactory.getLogger(AdvancedSolrQueryGenerator.class);
+    protected final static Logger LOGGER = LoggerFactory.getLogger(SolrQueryGenerator.class);
 
     @Override
-    public SolrQuery generateFinalQuery(SubQuery query) {
+    public SolrQuery generateFinalQuery(SolrCommonQuery query_) {
         SolrQuery solrQuery = new SolrQuery();
+        solrQuery.setParam("collection",query_.getCollectionName());
+        SubQuery query=query_.getSubQuery();
         if (query == null) {
             return solrQuery;
         }
         StringBuffer solrQueryBuffer = new StringBuffer();
         makeFinalSolrQuery(query, solrQueryBuffer);
+
+
+        int pageNum = query_.getPageNum();
+        if (pageNum < 1) {
+            //default first page
+            pageNum = 1;
+        } else {
+            pageNum = query_.getPageNum();
+        }
+        List<SortItem> sortItems = query_.getSortItems();
+        if (sortItems == null) {
+            sortItems = Lists.newArrayList();
+        }
+        for (String functionQueryString : query_.getFunctionQuerysList()) {
+
+            solrQueryBuffer.append("_query_:\"{!func}" + functionQueryString + "\"" + " AND ");
+
+        }
+        if (solrQueryBuffer.toString().contains("AND")) {
+
+            int and = solrQueryBuffer.lastIndexOf("AND");
+            solrQueryBuffer.replace(and, and + 3, "");
+        }
+        if (solrQueryBuffer.toString().trim().length() == 0) {
+            solrQueryBuffer.append("*:*");
+        }
+        for (SortItem sortItem : sortItems) {
+            String fieldName = sortItem.getFieldName();
+            String order = sortItem.getSort();
+
+            if (order == null) {
+                LOGGER.info("ingore sort fieldName:" + fieldName + ", please configure it.");
+                continue;
+            }
+            if (order.trim().equals("asc")) {
+                solrQuery.setSort(fieldName, SolrQuery.ORDER.asc);
+            }
+            if (order.trim().equals("desc")) {
+                solrQuery.addSort(fieldName, SolrQuery.ORDER.desc);
+
+            }
+
+        }
+
+        for (String fl : query_.getFls()) {
+            solrQuery.addField(fl);
+
+        }
+        int pageSize = query_.getPageSize();
+        solrQuery.add("start", String.valueOf((pageNum - 1) * pageSize));
+        solrQuery.add("rows", String.valueOf(pageSize));
+
+        //if have distance query
+        //fq=_query_:%22{!geofilt}%22&sfield=location&pt=45.15,-93.85&d=50000&sort=geodist()%20asc&fl=score,geodist(),location
+        String location = query_.getLocationPoint();
+        Double distance = query_.getDistance();
+
+        if (location != null && distance != null) {
+            solrQuery.add("d", distance.toString());
+            solrQuery.add("pt", location);
+            solrQuery.add("sfield", "location");
+            solrQuery.add("fq", "_query_:{!geofilt}");
+            solrQuery.addSort("geodist()", SolrQuery.ORDER.asc);
+
+        }
         LOGGER.info(solrQueryBuffer.toString());
+        solrQuery.setQuery(solrQueryBuffer.toString());
+
         return solrQuery;
     }
 
@@ -149,7 +220,10 @@ public class AdvancedSolrQueryGenerator implements QueryGenerator<SolrQuery, Sub
         finalQuery_.getSubQuerys().add(finalQuery);
         finalQuery_.getSubQuerys().add(sexQuery);
         LOGGER.info(Instances.gson.toJson(finalQuery_) + "\n");
-        new AdvancedSolrQueryGenerator().generateFinalQuery(finalQuery_);
+        SolrCommonQuery solrCommonQuery=new SolrCommonQuery("user");
+        solrCommonQuery.setSubQuery(finalQuery_);
+        SolrQuery solrQuery=new SolrQueryGenerator().generateFinalQuery(solrCommonQuery);
+        LOGGER.info(solrQuery.toString());
 
     }
 }

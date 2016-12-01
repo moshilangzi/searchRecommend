@@ -1,10 +1,12 @@
-package com.comm.sr.service;
+package com.comm.sr.service.search;
 
+import com.comm.sr.common.core.AbstractQueryService;
 import com.comm.sr.common.component.AbstractComponent;
 import com.comm.sr.common.entity.CommonQuery;
 import com.comm.sr.common.entity.SearchServiceRule;
 import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.utils.GsonHelper;
+import com.comm.sr.service.topic.TopicService;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.Serializable;
@@ -24,7 +26,7 @@ public abstract class BasedSearchService<A extends AbstractQueryService,Q extend
 
 
 
-    public BasedSearchService(AbstractQueryService queryService, SR serviceRule,Properties settings) {
+    public BasedSearchService(AbstractQueryService queryService, SR serviceRule,Properties settings,TopicService topicService) {
         super(settings);
         this.queryService = queryService;
         this.serviceRule = serviceRule;

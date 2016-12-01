@@ -8,12 +8,11 @@ package com.comm.sr.solr;
 import com.comm.sr.common.entity.CommonQuery;
 import com.comm.sr.common.entity.QueryItem;
 import com.comm.sr.common.entity.SortItem;
-import com.comm.sr.service.solr.SolrQueryService;
+import com.comm.sr.common.solr.SolrQueryService;
 import com.google.common.collect.Lists;
 import org.junit.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 
@@ -76,10 +75,10 @@ public class SolrQueryServiceTest {
      */
     @Test
     public void testQuery() throws Exception {
-        List<Map<String, Object>> results = service.query(commonQuery);
-        for (Map<String, Object> result : results) {
-            System.out.print(result.get("userID") + "\n"+result.get("nickname"));
-        }
+//        List<Map<String, Object>> results = service.query(commonQuery);
+//        for (Map<String, Object> result : results) {
+//            System.out.print(result.get("userID") + "\n"+result.get("nickname"));
+//        }
 
     }
 
@@ -88,13 +87,13 @@ public class SolrQueryServiceTest {
      */
     @Test
     public void testProcessQuery() throws Exception {
-        CommonQuery bq=new CommonQuery();
-        List<Map<String, Object>> results = service.processQuery(commonQuery);
-        for (Map<String, Object> result : results) {
-            System.out.print(result.get("userID") + "\n");
-             System.out.print(result.get("dynValue") + "\n");
-              System.out.print(result.get("score") + "\n");
-        }
+//        CommonQuery bq=new CommonQuery();
+//        List<Map<String, Object>> results = service.processQuery(commonQuery);
+//        for (Map<String, Object> result : results) {
+//            System.out.print(result.get("userID") + "\n");
+//             System.out.print(result.get("dynValue") + "\n");
+//              System.out.print(result.get("score") + "\n");
+//        }
 
     }
     public static void main(String[] args) {

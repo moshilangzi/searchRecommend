@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.comm.sr.service.elasticsearch;
+package com.comm.sr.common.elasticsearch;
 
 import com.comm.sr.common.entity.EsCommonQuery;
 import com.comm.sr.common.entity.QueryItem;
 import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
 import com.comm.sr.common.utils.Instances;
-import com.comm.sr.service.QueryGenerator;
+import com.comm.sr.common.core.QueryGenerator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
@@ -42,8 +42,18 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
 
     @Override
     public EsQueryGenerator.EsQueryWrapper generateFinalQuery(EsCommonQuery query) {
+        final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         String index = query.getIndex();
         String type = query.getType();
+        String queryStr=query.getQueryStr();
+        if(queryStr!=null&&!queryStr.isEmpty()){
+            searchSourceBuilder.query(queryStr);
+            EsQueryWrapper esQueryWrapper=new EsQueryWrapper(index,searchSourceBuilder,type);
+            return esQueryWrapper;
+
+
+        }
+
         List<String> fls = query.getFls();
         List<QueryItem> queryItems = query.getQueryItems();
         List<SortItem> sortItems = query.getSortItems();
@@ -56,7 +66,7 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
             pageNum = query.getPageNum();
         }
 
-        final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
 
         searchSourceBuilder.from((pageNum - 1) * pageSize).size(pageSize);
         if(sortItems!=null){

@@ -2,8 +2,9 @@ package com.comm.sr.service.impl;
 
 import com.comm.sr.NodeTestUtils;
 import com.comm.sr.common.entity.*;
-import com.comm.sr.service.elasticsearch.EsQueryService;
 import com.comm.sr.common.utils.GsonHelper;
+import com.comm.sr.common.elasticsearch.EsQueryService;
+import com.comm.sr.service.search.EsTestSearchService;
 import com.google.common.collect.Lists;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Created by jasstion on 24/10/2016.
@@ -148,8 +150,10 @@ public class EsTestSearchServiceTest {
 
         EsQueryService esQueryService=null;//new EsQueryService(client);
         SearchServiceRule searchServiceRule=new SearchServiceRule();
+        Properties settings=new Properties();
 
-        EsTestSearchService esTestSearchService=new EsTestSearchService(esQueryService,searchServiceRule,null);
+
+        EsTestSearchService esTestSearchService=new EsTestSearchService(esQueryService,searchServiceRule,null,null);
         String queryStr= GsonHelper.objToJson(commQuery);
         m_log.info(queryStr);
 

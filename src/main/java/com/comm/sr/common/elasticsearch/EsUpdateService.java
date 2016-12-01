@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.comm.sr.service.elasticsearch;
+package com.comm.sr.common.elasticsearch;
 
-import com.comm.sr.service.UpdateService;
+import com.comm.sr.common.core.UpdateService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

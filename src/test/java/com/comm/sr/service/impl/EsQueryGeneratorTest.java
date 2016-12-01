@@ -10,7 +10,7 @@ import com.comm.sr.common.entity.EsCommonQuery;
 import com.comm.sr.common.entity.QueryItem;
 import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
-import com.comm.sr.service.elasticsearch.EsQueryGenerator;
+import com.comm.sr.common.elasticsearch.EsQueryGenerator;
 import com.google.common.collect.Lists;
 import org.junit.*;
 

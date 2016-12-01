@@ -51,12 +51,12 @@ public class KafkaTopicService extends AbstractComponent implements TopicService
 
     public static void main(String[] args){
         Properties props=new Properties();
-        props.put("metadata.broker.list", "127.0.0.1:32773");
+        props.put("metadata.broker.list", "localhost:9092");
         props.put("serializer.class", "kafka.serializer.StringEncoder");
 
        // props.put("request.required.acks", "1");
         TopicService topicService=new KafkaTopicService(props);
-        topicService.publishTopicMessage("my-replicated-topic_4","this is my first message!");
+        topicService.publishTopicMessage("my-replicated-topic","this is my first message!");
 
 
 
