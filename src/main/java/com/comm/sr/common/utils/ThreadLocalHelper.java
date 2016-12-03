@@ -1,6 +1,7 @@
 package com.comm.sr.common.utils;
 
 import com.comm.sr.common.entity.ThreadShardEntity;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -14,24 +15,32 @@ public class ThreadLocalHelper {
 
 
 
-    public static ThreadShardEntity getThreadShardEntity() throws Exception {
+    public static ThreadShardEntity getThreadShardEntity() {
+        ThreadShardEntity threadShardEntity = null;
+       try {
 
 
-        ThreadShardEntity threadShardEntity=null;
 
-        Thread otherThread = Thread.currentThread(); // get a reference to the otherThread somehow (this is just for demo)
+           Thread otherThread = Thread.currentThread(); // get a reference to the otherThread somehow (this is just for demo)
 
-        Field field = Thread.class.getDeclaredField("threadLocals");
-        field.setAccessible(true);
-        Object map = field.get(otherThread);
+           Field field = Thread.class.getDeclaredField("threadLocals");
+           field.setAccessible(true);
+           Object map = field.get(otherThread);
 
-        Method method = Class.forName("java.lang.ThreadLocal$ThreadLocalMap").getDeclaredMethod("getEntry", ThreadLocal.class);
-        method.setAccessible(true);
-        WeakReference entry = (WeakReference) method.invoke(map, threadShardEntity);
+           Method method = Class.forName("java.lang.ThreadLocal$ThreadLocalMap")
+               .getDeclaredMethod("getEntry", ThreadLocal.class);
+           method.setAccessible(true);
+           WeakReference entry = (WeakReference) method.invoke(map, threadShardEntity);
 
-        Field valueField = Class.forName("java.lang.ThreadLocal$ThreadLocalMap$Entry").getDeclaredField("value");
-        valueField.setAccessible(true);
-        ThreadShardEntity value = (ThreadShardEntity)valueField.get(entry);
+           Field valueField = Class.forName("java.lang.ThreadLocal$ThreadLocalMap$Entry")
+               .getDeclaredField("value");
+           valueField.setAccessible(true);
+            threadShardEntity = (ThreadShardEntity) valueField.get(entry);
+       }catch (Exception e){
+           System.out.print(ExceptionUtils.getStackTrace(e));
+
+           //do nothing
+       }
         return threadShardEntity;
     }
 
@@ -49,6 +58,7 @@ public static void main(String[] args) throws Exception {
 
     Thread otherThread = Thread.currentThread(); // get a reference to the otherThread somehow (this is just for demo)
 
+
     Field field = Thread.class.getDeclaredField("threadLocals");
     field.setAccessible(true);
     Object map = field.get(otherThread);
@@ -60,9 +70,9 @@ public static void main(String[] args) throws Exception {
     Field valueField = Class.forName("java.lang.ThreadLocal$ThreadLocalMap$Entry").getDeclaredField("value");
     valueField.setAccessible(true);
     ThreadShardEntity value = (ThreadShardEntity)valueField.get(entry);
-    String strValue=(String)valueField.get(entry);
     System.out.print(value.getSearchId());
-    System.out.print(strValue);
+
+    System.out.print(getThreadShardEntity().getSearchId());
 }
 
 

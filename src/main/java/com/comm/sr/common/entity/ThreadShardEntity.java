@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class ThreadShardEntity implements Serializable{
 
-    private String searchId=null;
+    private String searchId="";
 
     public ThreadShardEntity(String searchId) {
         this.searchId = searchId;

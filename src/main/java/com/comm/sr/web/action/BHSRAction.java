@@ -93,13 +93,12 @@ public class BHSRAction {
         printJsonTemplate(code, msg, data, request, response);
 
     }
-
+    final static ThreadLocal<ThreadShardEntity> threadShardEntity=new ThreadLocal<ThreadShardEntity>();
     @RequestMapping(value = "/search")
     public void search(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UUID uuid = UUID.randomUUID();
         //每次服务请求对应的唯一id
         String uuidStr = uuid.toString();
-        ThreadLocal<ThreadShardEntity> threadShardEntity = new ThreadLocal<ThreadShardEntity>();
         ThreadShardEntity threadShardEntity_=new ThreadShardEntity(uuidStr);
         threadShardEntity.set(threadShardEntity_);
 

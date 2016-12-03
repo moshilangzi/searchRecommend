@@ -1,13 +1,17 @@
 package com.comm.sr.service.search;
 
-import com.comm.sr.common.core.AbstractQueryService;
+import com.alibaba.fastjson.JSONObject;
 import com.comm.sr.common.component.AbstractComponent;
+import com.comm.sr.common.core.AbstractQueryService;
 import com.comm.sr.common.entity.CommonQuery;
 import com.comm.sr.common.entity.SearchServiceRule;
 import com.comm.sr.common.entity.SortItem;
+import com.comm.sr.common.entity.ThreadShardEntity;
+import com.comm.sr.common.utils.Constants;
 import com.comm.sr.common.utils.GsonHelper;
 import com.comm.sr.service.topic.TopicService;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
@@ -23,6 +27,7 @@ import java.util.Properties;
 public abstract class BasedSearchService<A extends AbstractQueryService,Q extends CommonQuery, SR extends SearchServiceRule, R2> extends AbstractComponent implements Serializable {
     protected AbstractQueryService queryService=null;
     protected SR serviceRule=null;
+    protected TopicService topicService=null;
 
 
 
@@ -30,6 +35,7 @@ public abstract class BasedSearchService<A extends AbstractQueryService,Q extend
         super(settings);
         this.queryService = queryService;
         this.serviceRule = serviceRule;
+        this.topicService=topicService;
     }
 
     public BasedSearchService(A queryService,Properties settings) {
@@ -69,10 +75,12 @@ public abstract class BasedSearchService<A extends AbstractQueryService,Q extend
 
     }
 
-
+    ThreadShardEntity threadShardEntity= Constants.threadShardEntity.get();
     public R2 search(String queryStr){
 
-
+        JSONObject message=new JSONObject();
+        message.put("searchId",threadShardEntity.getSearchId());
+        message.put("queryStr",queryStr);
 
         Type genType = getClass().getGenericSuperclass();
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
@@ -84,8 +92,16 @@ public abstract class BasedSearchService<A extends AbstractQueryService,Q extend
         List<Map<String,Object>> results= null;
         try {
             results = doSearch(query);
+            message.put("result",GsonHelper.objToJson(results));
+
+
+
+            topicService.publishTopicMessage(settings.getProperty("searchTopicName","srTopic"),message.toJSONString());
+
         } catch (Exception e) {
-            e.printStackTrace();
+            message.put("error",ExceptionUtils.getStackTrace(e));
+            logger.info(message.toJSONString());
+            topicService.publishTopicMessage(settings.getProperty("searchTopicName","srTopic"),GsonHelper.objToJson(results));
         }
         R2 finalResults=postOperationAfterSearch(results);
         return finalResults;
