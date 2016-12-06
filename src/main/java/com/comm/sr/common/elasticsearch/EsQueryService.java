@@ -12,6 +12,7 @@ import com.comm.sr.service.cache.CacheService;
 import com.google.common.collect.Lists;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.search.SearchHit;
 
@@ -35,7 +36,9 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
 
 
             String hosts=settings.getProperty("elasticSearchHosts");
-            client=TransportClient.builder().build();
+         String clusterName=settings.getProperty("elasticSearchClusterName");
+        Settings esSettings = Settings.settingsBuilder().put("cluster.name", clusterName).build();
+            client=TransportClient.builder().settings(esSettings).build();
 
             for(String host:hosts.split(";")){
 
