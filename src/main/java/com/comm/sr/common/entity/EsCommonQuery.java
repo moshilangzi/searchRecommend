@@ -53,8 +53,8 @@ public class EsCommonQuery extends CommonQuery {
         super();
     }
 
-    public EsCommonQuery(List queryItems, int pageNum, int pageSize, List<SortItem> sortItems, List<String> fls, String index, String type) {
-        super(queryItems, pageNum, pageSize, sortItems, fls);
+    public EsCommonQuery( int pageNum, int pageSize, List<SortItem> sortItems, List<String> fls, String index, String type) {
+        super( pageNum, pageSize, sortItems, fls);
         this.index = index;
         this.type = type;
 

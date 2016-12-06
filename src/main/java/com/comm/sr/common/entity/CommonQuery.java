@@ -5,8 +5,6 @@
  */
 package com.comm.sr.common.entity;
 
-import com.google.common.collect.Lists;
-
 import java.util.List;
 
 /**
@@ -23,8 +21,6 @@ public class CommonQuery extends AbstractQuery {
     protected SubQuery subQuery=new SubQuery();
 
 
-    protected List<QueryItem> queryItems = Lists.newArrayList();
-    private List<String> functionQuerysList = Lists.newArrayList();
     //经维度，  两个数值，逗号隔开， 默认字段: longitudeDimension
     private String locationPoint = null;
     //km
@@ -34,9 +30,8 @@ public class CommonQuery extends AbstractQuery {
         super();
     }
 
-    public CommonQuery(List queryItems, int pageNum, int pageSize, List<SortItem> sortItems, List<String> fls) {
+    public CommonQuery(int pageNum, int pageSize, List<SortItem> sortItems, List<String> fls) {
         super(pageNum, pageSize, sortItems, fls);
-        this.queryItems = queryItems;
 
     }
 
@@ -48,29 +43,16 @@ public class CommonQuery extends AbstractQuery {
         this.subQuery = subQuery;
     }
 
-    public List<String> getFunctionQuerysList() {
-        return functionQuerysList;
-    }
 
-    public void setFunctionQuerysList(List<String> functionQuerysList) {
-        this.functionQuerysList = functionQuerysList;
-    }
 
-    public List<QueryItem> getQueryItems() {
-        return queryItems;
-    }
 
-    public void setQueryItems(List<QueryItem> queryItems) {
-        this.queryItems = queryItems;
-    }
+
 
     @Override
     public String toString() {
         return "CommonQuery{" +
                 "distance=" + distance +
                 ", subQuery=" + subQuery +
-                ", queryItems=" + queryItems +
-                ", functionQuerysList=" + functionQuerysList +
             ", queryStr=" + queryStr +
                 ", locationPoint='" + locationPoint + '\'' +
                 "} " + super.toString();
@@ -79,12 +61,10 @@ public class CommonQuery extends AbstractQuery {
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 37 * hash + this.gender;
         hash = 37 * hash + this.pageNum;
         hash = 37 * hash + this.pageSize;
         hash = 37 * hash + (this.fls != null ? this.fls.hashCode() : 0);
         hash = 37 * hash + (this.queryStr != null ? this.queryStr.hashCode() : 0);
-        hash = 37 * hash + (this.queryItems != null ? this.queryItems.hashCode() : 0);
         StringBuffer sb = new StringBuffer();
         for (SortItem sortItem : sortItems) {
             sb.append(sortItem.fieldName);

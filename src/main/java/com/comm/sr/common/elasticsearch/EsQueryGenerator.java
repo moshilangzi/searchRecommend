@@ -5,12 +5,12 @@
  */
 package com.comm.sr.common.elasticsearch;
 
+import com.comm.sr.common.core.QueryGenerator;
 import com.comm.sr.common.entity.EsCommonQuery;
 import com.comm.sr.common.entity.QueryItem;
 import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
 import com.comm.sr.common.utils.Instances;
-import com.comm.sr.common.core.QueryGenerator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +55,6 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         }
 
         List<String> fls = query.getFls();
-        List<QueryItem> queryItems = query.getQueryItems();
         List<SortItem> sortItems = query.getSortItems();
         int pageNum = query.getPageNum();
         int pageSize = query.getPageSize();
@@ -92,25 +91,40 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
 
         }
         BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
-        //解析queryItems
-        if(queryItems!=null){
-            for (QueryItem queryItem : queryItems) {
 
-                BoolQueryBuilder tmpBoolQueryBuilder = new BoolQueryBuilder();
-                makeBoolQuery(queryItem, tmpBoolQueryBuilder);
 
-                boolQueryBuilder.must(tmpBoolQueryBuilder);
-
-            }
-        }
 
         //解析subQuery
         SubQuery subQuery=query.getSubQuery();
+
         if(subQuery!=null){
             makeFinalBoolQuery(subQuery,boolQueryBuilder);
 
 
         }
+        //添加filter
+
+        BoolQueryBuilder filterQuery = new BoolQueryBuilder();
+        List<SubQuery> subQueries=subQuery.getSubQuerys();
+        if(subQueries!=null){
+
+            for(SubQuery query1:subQueries){
+                if(query1.getQueryItem()!=null&&query1.getQueryItem().isIsFilterType()){
+                    makeBoolQuery(query1.getQueryItem(),filterQuery);
+
+
+
+
+                }
+
+            }
+            if(filterQuery.hasClauses()){
+                boolQueryBuilder.filter(filterQuery);
+            }
+
+
+        }
+
 
 
         //deal with function score query
@@ -142,9 +156,11 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
             functionScoreQueryBuilder.add(scriptBuilder);
 
 
+
         }
         if(functionScoreQueryBuilder!=null){
             searchSourceBuilder.query(functionScoreQueryBuilder);
+
 
         }
         else{
@@ -166,9 +182,11 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         return esQueryWrapper;
     }
 
+
     private void makeBoolQuery(QueryItem queryItem, BoolQueryBuilder tmpBoolQueryBuilder) {
         String fieldName = queryItem.getFieldName();
         List<String> matchValues = queryItem.getMatchedValues();
+
         if (matchValues.size() > 0) {
             for (String matchValue : matchValues) {
                 if (matchValue == null || matchValue.trim().length() < 1) {
@@ -220,6 +238,8 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
                     //if payload term query
                     if(queryItem.isPayload()){
                         QueryBuilder termQueryBuilder = new PayloadTermQueryBuilder(fieldName, matchValue);
+
+
                         tmpBoolQueryBuilder.should(termQueryBuilder);
 
 
@@ -291,20 +311,22 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
 
                 BoolQueryBuilder tempBoolQueryBuilder=new BoolQueryBuilder();
                     makeFinalBoolQuery(subQuerys.get(i),tempBoolQueryBuilder);
-                if(query.getLogic().equals("AND")){
-                    boolQueryBuilder.must(tempBoolQueryBuilder);
+                if(tempBoolQueryBuilder.hasClauses()) {
+                    if (query.getLogic().equals("AND")) {
+
+                        boolQueryBuilder.must(tempBoolQueryBuilder);
+
+                    }
+                    if (query.getLogic().equals("OR")) {
+                        boolQueryBuilder.should(tempBoolQueryBuilder);
+
+                    }
+                    if (query.getLogic().equals("NOT")) {
+                        boolQueryBuilder.mustNot(tempBoolQueryBuilder);
+
+                    }
 
                 }
-                if(query.getLogic().equals("OR")){
-                    boolQueryBuilder.should(tempBoolQueryBuilder);
-
-                }
-                if(query.getLogic().equals("NOT")){
-                    boolQueryBuilder.mustNot(tempBoolQueryBuilder);
-
-                }
-
-
             }
 
 
@@ -312,7 +334,10 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         } else {
            // BoolQueryBuilder tempBoolQueryBuilder=new BoolQueryBuilder();
             if(queryItem!=null){
-                makeBoolQuery(queryItem, boolQueryBuilder);
+                if(!queryItem.isIsFilterType()){
+                    makeBoolQuery(queryItem, boolQueryBuilder);
+                }
+
             }
 
 
@@ -359,7 +384,7 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         finalQuery_.getSubQuerys().add(sexQuery);
         LOGGER.info(Instances.gson.toJson(finalQuery_) + "\n");
 
-        EsCommonQuery esCommonQuery = new EsCommonQuery(null, 1, 5, null, Lists.newArrayList(), "test", "test");
+        EsCommonQuery esCommonQuery = new EsCommonQuery(1, 5, null, Lists.newArrayList(), "test", "test");
         esCommonQuery.setSubQuery(finalQuery_);
 
         String query=new EsQueryGenerator().generateFinalQuery(esCommonQuery).getSearchSourceBuilder().toString();

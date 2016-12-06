@@ -34,11 +34,16 @@ public class KafkaTopicService extends AbstractComponent implements TopicService
 
     @Override
     public void publishTopicMessage(String topic, String message) {
-        KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic,null, message);
+        try {
+            KeyedMessage<String, String> data =
+                new KeyedMessage<String, String>(topic, null, message);
 
-        producer.send(data);
-        if(logger.isDebugEnabled()){
-            logger.debug("succeed to send message[{}]",data);
+            producer.send(data);
+            if (logger.isDebugEnabled()) {
+                logger.debug("succeed to send message[{}]", data);
+            }
+        }catch (Exception e){
+            logger.info("error to send message to kafka!");
         }
 
     }

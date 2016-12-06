@@ -1,5 +1,7 @@
 package com.comm.sr.common.entity;
 
+import com.google.common.collect.Lists;
+
 import java.util.List;
 
 /**
@@ -7,15 +9,23 @@ import java.util.List;
  */
 public class SolrCommonQuery extends CommonQuery {
   private String collectionName=null;
+  private List<String> functionQuerysList = Lists.newArrayList();
 
   public SolrCommonQuery(String collectionName) {
     super();
     this.collectionName = collectionName;
   }
+  public List<String> getFunctionQuerysList() {
+    return functionQuerysList;
+  }
 
-  public SolrCommonQuery(List queryItems, int pageNum, int pageSize, List<SortItem> sortItems,
+  public void setFunctionQuerysList(List<String> functionQuerysList) {
+    this.functionQuerysList = functionQuerysList;
+  }
+
+  public SolrCommonQuery(int pageNum, int pageSize, List<SortItem> sortItems,
       List<String> fls, String collectionName) {
-    super(queryItems, pageNum, pageSize, sortItems, fls);
+    super(pageNum, pageSize, sortItems, fls);
     this.collectionName = collectionName;
   }
 

@@ -16,7 +16,6 @@ import java.util.List;
  */
 public class AbstractQuery implements Serializable {
 
-    protected int gender = -1;
 
     protected int pageNum = -1;
     protected int pageSize = 18;
@@ -54,9 +53,8 @@ public class AbstractQuery implements Serializable {
         return fls;
     }
 
-    public int getGender() {
-        return gender;
-    }
+
+
 
     public int getPageNum() {
         return pageNum;
@@ -74,9 +72,6 @@ public class AbstractQuery implements Serializable {
         this.fls = fls;
     }
 
-    public void setGender(int gender) {
-        this.gender = gender;
-    }
 
     public void setPageNum(int pageNum) {
         this.pageNum = pageNum;

@@ -5,8 +5,8 @@
  */
 package com.comm.sr.solr;
 
-import com.comm.sr.common.entity.CommonQuery;
 import com.comm.sr.common.entity.QueryItem;
+import com.comm.sr.common.entity.SolrCommonQuery;
 import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.solr.SolrQueryService;
 import com.google.common.collect.Lists;
@@ -23,7 +23,8 @@ import java.util.Properties;
 public class SolrQueryServiceTest {
 
     SolrQueryService service = new SolrQueryService(null,new Properties());
-    CommonQuery commonQuery = new CommonQuery();
+    String collectionName="";
+    SolrCommonQuery commonQuery = new SolrCommonQuery(collectionName);
 
     public SolrQueryServiceTest() {
     }
@@ -45,7 +46,6 @@ public class SolrQueryServiceTest {
         queryItem_date.setIsFilterType(true);
         queryItem2.setIsFilterType(true);
         List<QueryItem> items = Lists.newArrayList(queryItem, queryItem1, queryItem2, queryItem_date);
-        commonQuery.setQueryItems(items);
         commonQuery.setFls(Lists.newArrayList("userID", "height","dynValue","score","nickname"));
         List<SortItem> sortItems = Lists.newArrayList();
         SortItem sortItem = new SortItem();
@@ -59,7 +59,6 @@ public class SolrQueryServiceTest {
         sortItem3.setSort("desc");
         sortItems = Lists.newArrayList(sortItem, sortItem1, sortItem3);//
        // commonQuery.setSortItems(sortItems);
-        commonQuery.setGender(0);
         commonQuery.setCacheStrategy("100");
         List<String> functionQueryList=Lists.newArrayList();
         functionQueryList.add("product(dynValue,100)");

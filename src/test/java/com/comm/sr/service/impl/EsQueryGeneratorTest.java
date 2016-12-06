@@ -11,6 +11,7 @@ import com.comm.sr.common.entity.QueryItem;
 import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
 import com.comm.sr.common.elasticsearch.EsQueryGenerator;
+import com.comm.sr.common.utils.GsonHelper;
 import com.google.common.collect.Lists;
 import org.junit.*;
 
@@ -68,16 +69,39 @@ public class EsQueryGeneratorTest {
         List<SortItem> sortItems = Lists.newArrayList();
         //logstash-2015.12.10 log4j
         //EsCommonQuery baiheQuery = new EsCommonQuery(items, 1, 18, sortItems, fls, "baihe_user", "user");
-        EsCommonQuery baiheQuery = new EsCommonQuery(items, 1, 5, sortItems, fls, indexName, typeName);
+        EsCommonQuery baiheQuery = new EsCommonQuery(1, 5, sortItems, fls, indexName, typeName);
         baiheQuery.setSubQuery(subQuery);
         baiheQuery.setScoreScript("100*_score");
+        System.out.print(GsonHelper.objToJson(baiheQuery)+"\n");
 
 
 
 
-        EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(baiheQuery);
+
+
+        indexName="vcg_creative";
+        typeName="vcgcsdn";
+        SubQuery subQuery2=new SubQuery();
+        subQuery2.setLogic("AND");
+        SubQuery item1=new SubQuery();
+        QueryItem qi=new QueryItem("onlineState",Lists.newArrayList("1"),false);
+
+        qi.setIsFilterType(true);
+        item1.setQueryItem(qi);
+        SubQuery item2=new SubQuery();
+        item2.setQueryItem(new QueryItem("prekey3",Lists.newArrayList("4165"),true));
+        subQuery2.setSubQuerys(Lists.newArrayList(item1,item2));
+        EsCommonQuery query = new EsCommonQuery(1, 5, null, Lists.newArrayList("_score","prekey3"), indexName, typeName);
+       query.setScoreScript("1.0*_score");
+        query.setSubQuery(subQuery2);
+        System.out.print(GsonHelper.objToJson(query)+"\n");
+        EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(query);
 
         System.out.print(esQueryWrapper.getSearchSourceBuilder().toString());
+
+
+
+
 
 
     }

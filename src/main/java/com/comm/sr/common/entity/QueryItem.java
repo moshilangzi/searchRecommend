@@ -35,6 +35,13 @@ public class QueryItem implements Serializable {
         this.fieldName = fieldName;
         this.matchedValues = matchedValues;
     }
+    public QueryItem(String fieldName, List<String> matchedValues,boolean isPayload) {
+        this.fieldName = fieldName;
+        this.matchedValues = matchedValues;
+        this.isPayload=isPayload;
+    }
+
+
 
     public QueryItem() {
         super();

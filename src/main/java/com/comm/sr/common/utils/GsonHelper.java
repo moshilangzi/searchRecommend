@@ -89,7 +89,7 @@ public class GsonHelper {
         List<SortItem> sortItems = Lists.newArrayList();
         //logstash-2015.12.10 log4j
         //EsCommonQuery baiheQuery = new EsCommonQuery(items, 1, 18, sortItems, fls, "baihe_user", "user");
-        EsCommonQuery baiheQuery = new EsCommonQuery(items, 1, 5, sortItems, fls, indexName, typeName);
+        EsCommonQuery baiheQuery = new EsCommonQuery(1, 5, sortItems, fls, indexName, typeName);
         baiheQuery.setSubQuery(subQuery);
         baiheQuery.setScoreScript("100*_score");
 

@@ -38,7 +38,7 @@ public class EsTestSearchServiceTest {
         QueryItem queryItem1=new QueryItem("des", Lists.newArrayList("boss"));
         SubQuery subQuery1=new SubQuery("NOT",queryItem1 );
         subQuery1.setSubQuerys(Lists.newArrayList(new SubQuery("AND", new QueryItem("age", Lists.newArrayList("1220TO1230")))));
-        subQueries.add(subQuery1);
+        //subQueries.add(subQuery1);
         subQuery.setSubQuerys(subQueries);
 
 
@@ -47,9 +47,9 @@ public class EsTestSearchServiceTest {
         List<SortItem> sortItems = Lists.newArrayList();
         //logstash-2015.12.10 log4j
         //EsCommonQuery commQuery = new EsCommonQuery(items, 1, 18, sortItems, fls, "comm_user", "user");
-        EsCommonQuery commQuery = new EsCommonQuery(items, 1, 5, sortItems, fls, indexName, typeName);
+        EsCommonQuery commQuery = new EsCommonQuery(1, 5, sortItems, fls, indexName, typeName);
         commQuery.setSubQuery(subQuery);
-        commQuery.setScoreScript("1*_score");
+        commQuery.setScoreScript("1.0");
 
 
       UUID uuid = UUID.randomUUID();
