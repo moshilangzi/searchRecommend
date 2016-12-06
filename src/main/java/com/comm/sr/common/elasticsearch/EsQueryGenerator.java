@@ -145,10 +145,9 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
            // String inlineScript = "((_score+1)*1.0 + 2.0/((1.469097882-(doc['uploadTime'].value as double)/1000000000)*17000+1.0))/_score";
             String inlineScript=query.getScoreScript();
             Map<String, Object> params = Maps.newHashMap();
-            String language="javascript";
 
 
-            Script script = new Script(inlineScript, ScriptService.ScriptType.INLINE, language, params);
+            Script script = new Script(inlineScript, ScriptService.ScriptType.INLINE, ScriptService.DEFAULT_LANG, params);
             ScriptScoreFunctionBuilder scriptBuilder = ScoreFunctionBuilders.scriptFunction(script);
 
 
