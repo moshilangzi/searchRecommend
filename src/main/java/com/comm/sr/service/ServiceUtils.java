@@ -1,10 +1,14 @@
 package com.comm.sr.service;
 
+import com.comm.sr.common.core.AbstractQueryService;
+import com.comm.sr.common.elasticsearch.EsQueryService;
 import com.comm.sr.service.cache.CacheService;
 import com.comm.sr.service.cache.RedisCacheService;
 import com.comm.sr.service.ruleAdmin.RuleAdminService;
 import com.comm.sr.service.topic.KafkaTopicService;
 import com.comm.sr.service.topic.TopicService;
+import com.comm.sr.service.vcg.KeywordService;
+import com.comm.sr.service.vcg.VcgSearchService;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
@@ -41,4 +45,22 @@ public class ServiceUtils {
     return ruleAdminService;
   }
 
+  public static AbstractQueryService getQueryService(){
+    AbstractQueryService searchService=new EsQueryService(settings,null);
+    return searchService;
+
+
+  }
+  public static KeywordService getKeywordService(){
+    KeywordService keywordService=new KeywordService(settings);
+    return keywordService;
+
+
+  }
+  public static VcgSearchService getVcgSearchService(){
+    VcgSearchService vcgSearchService=new VcgSearchService(settings,getQueryService(),getKeywordService());
+    return vcgSearchService;
+
+
+  }
 }

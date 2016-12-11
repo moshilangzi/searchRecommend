@@ -20,7 +20,8 @@ import java.util.List;
  * Created by jasstion on 24/10/2016.
  */
 public class GsonHelper {
-    private final static GsonBuilder g = new GsonBuilder();
+    private final static GsonBuilder g = new GsonBuilder().disableHtmlEscaping();
+
 
     private final static Gson gson = g.create();
 

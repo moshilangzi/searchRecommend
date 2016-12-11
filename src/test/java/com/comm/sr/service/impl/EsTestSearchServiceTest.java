@@ -1,7 +1,12 @@
 package com.comm.sr.service.impl;
 
-import com.comm.sr.common.entity.*;
+import com.comm.sr.common.elasticsearch.EsQueryGenerator;
+import com.comm.sr.common.entity.EsCommonQuery;
+import com.comm.sr.common.entity.QueryItem;
+import com.comm.sr.common.entity.SubQuery;
+import com.comm.sr.common.entity.ThreadShardEntity;
 import com.comm.sr.common.utils.Constants;
+import com.comm.sr.common.utils.DateTimeUtil;
 import com.comm.sr.common.utils.GsonHelper;
 import com.comm.sr.service.SearchServiceFactory;
 import com.comm.sr.service.search.EsTestSearchService;
@@ -9,6 +14,7 @@ import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,35 +27,23 @@ public class EsTestSearchServiceTest {
 
     public static void main(String[] args) throws Exception{
 
-      String indexName="com";
-      String typeName="user";
+      String indexName="vcg_creative";
+      String typeName="vcgcsdn";
+      SubQuery subQuery2=new SubQuery();
+      subQuery2.setLogic("AND");
+      SubQuery item1=new SubQuery();
+      QueryItem qi=new QueryItem("onlineState",Lists.newArrayList("1"),false);
 
-
-       // search query: (des: basket or des: football) AND (-des:boss)
-        List<QueryItem> items = Lists.newArrayList();
-
-        SubQuery subQuery=new SubQuery();
-        subQuery.setLogic("AND");
-      QueryItem payloadQueryItem=new QueryItem("des", Lists.newArrayList("basket", "football"));
-      payloadQueryItem.setIsPayload(true);
-       SubQuery payloadQuery=new SubQuery("AND", payloadQueryItem);
-
-        List<SubQuery> subQueries=Lists.newArrayList(payloadQuery);
-        QueryItem queryItem1=new QueryItem("des", Lists.newArrayList("boss"));
-        SubQuery subQuery1=new SubQuery("NOT",queryItem1 );
-        subQuery1.setSubQuerys(Lists.newArrayList(new SubQuery("AND", new QueryItem("age", Lists.newArrayList("1220TO1230")))));
-        //subQueries.add(subQuery1);
-        subQuery.setSubQuerys(subQueries);
-
-
-        final List<String> fls = Lists.newArrayList("userId","des","name","age");
-
-        List<SortItem> sortItems = Lists.newArrayList();
-        //logstash-2015.12.10 log4j
-        //EsCommonQuery commQuery = new EsCommonQuery(items, 1, 18, sortItems, fls, "comm_user", "user");
-        EsCommonQuery commQuery = new EsCommonQuery(1, 5, sortItems, fls, indexName, typeName);
-        commQuery.setSubQuery(subQuery);
-        commQuery.setScoreScript("1.0");
+      qi.setIsFilterType(true);
+      item1.setQueryItem(qi);
+      SubQuery item2=new SubQuery();
+      item2.setQueryItem(new QueryItem("prekey3", Lists.newArrayList("4165"), true));
+      subQuery2.setSubQuerys(Lists.newArrayList(item1,item2));
+      EsCommonQuery query = new EsCommonQuery(1, 5, null, Lists.newArrayList("createTime","uploadTime","prekey3","resId","_id","keywords"), indexName, typeName);
+      query.setScoreScript("long uploadTime=doc['uploadTime'].value;def now = new Date() ;long comparedTime=now.getTime()-uploadTime; int hours=comparedTime/1000/60/60/24/1000000;if (hours>3) _score; else _score+100.0");
+      query.setSubQuery(subQuery2);
+      System.out.print(GsonHelper.objToJson(query) + "\n");
+      EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(query);
 
 
       UUID uuid = UUID.randomUUID();
@@ -61,16 +55,23 @@ public class EsTestSearchServiceTest {
 
         EsTestSearchService esTestSearchService=
             (EsTestSearchService) SearchServiceFactory.srServices.get("esTest");
-        String queryStr= GsonHelper.objToJson(commQuery);
+        String queryStr= GsonHelper.objToJson(query);
         m_log.info(queryStr);
 
 
         List<Map<String, Object>> results= esTestSearchService.search(queryStr);
         for (Map<String,Object> user:results) {
-            Object content =  user.get("userId");
-            //String c1=new String(content.getBytes(),"utf8");
-            System.out.print(content+"\n");
-            System.out.print(user.get("score")+"\n");
+
+          long uploadTime=Long.parseLong((String)user.get("uploadTime"));
+          Date uploadDate=DateTimeUtil.getDateFromTimeMillis((long)uploadTime);
+          int hours=DateTimeUtil.getIntCompareToCurrDateHour(uploadDate);
+          if(hours>3){
+            user.put("new",true);
+          }
+          m_log.info(user.toString());
+
+
+
         }
 
 

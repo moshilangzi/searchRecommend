@@ -1,0 +1,61 @@
+From 4e00f2e0110b275f2b7642c7ee62829cc72e90e9 Mon Sep 17 00:00:00 2001
+From: zhaoyufei <zhao-0244@qq.com>
+Date: Wed, 7 Dec 2016 11:01:56 +0800
+Subject: [PATCH 2/2] fix issues that Context initialization failed
+
+---
+ src/main/webapp/WEB-INF/srservice-servlet.xml |  6 +++---
+ src/main/webapp/WEB-INF/web.xml               | 11 ++++++-----
+ 2 files changed, 9 insertions(+), 8 deletions(-)
+
+diff --git a/src/main/webapp/WEB-INF/srservice-servlet.xml b/src/main/webapp/WEB-INF/srservice-servlet.xml
+index a203a9f..2042387 100644
+--- a/src/main/webapp/WEB-INF/srservice-servlet.xml
++++ b/src/main/webapp/WEB-INF/srservice-servlet.xml
+@@ -4,11 +4,11 @@
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:mvc="http://www.springframework.org/schema/mvc"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+-	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
++	http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+     http://www.springframework.org/schema/context
+-    http://www.springframework.org/schema/context/spring-context-3.2.xsd
++    http://www.springframework.org/schema/context/spring-context-4.3.xsd
+     http://www.springframework.org/schema/mvc
+-    http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
++    http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+     <bean
+             class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+         <property name="locations">
+diff --git a/src/main/webapp/WEB-INF/web.xml b/src/main/webapp/WEB-INF/web.xml
+index 5bf8fdf..531d3be 100644
+--- a/src/main/webapp/WEB-INF/web.xml
++++ b/src/main/webapp/WEB-INF/web.xml
+@@ -5,7 +5,11 @@
+ 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+            version="2.5">
+     <!-- 配置Log4j -->
+-    
++
++    <context-param>
++        <param-name>contextConfigLocation</param-name>
++        <param-value>/WEB-INF/srservice-servlet.xml</param-value>
++    </context-param>
+     <context-param>
+         <param-name>log4jConfigLocation</param-name><!-- log4j配置文件路径 -->
+         <param-value>classpath:log4j.properties</param-value>
+@@ -50,10 +54,7 @@
+     <servlet>
+         <servlet-name>srservice</servlet-name>
+         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+-        <!--<init-param>-->
+-            <!--<param-name>contextConfigLocation</param-name>-->
+-            <!--<param-value>classpath:spring/applicationContext.xml</param-value>-->
+-        <!--</init-param>-->
++
+         <load-on-startup>1</load-on-startup>
+     </servlet>
+ 
+-- 
+2.9.3 (Apple Git-75)
+

@@ -90,6 +90,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.6</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -101,8 +106,24 @@
         <!-- https://mvnrepository.com/artifact/io.netty/netty-handler -->
         <!-- https://mvnrepository.com/artifact/io.netty/netty-handler -->
         <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+        <dependency>
+            <groupId>org.sql2o</groupId>
+            <artifactId>sql2o</artifactId>
+            <version>1.5.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yufei</groupId>
+            <artifactId>IK_Analyzer</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.lucene</groupId>
+                    <artifactId>lucene-core</artifactId>
+                </exclusion>
 
 
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.elasticsearch.plugin</groupId>
             <artifactId>lang-javascript</artifactId>
@@ -425,7 +446,7 @@
                         <filtering>true</filtering>
                     </resource>
                 </resources>
-                <finalName>baihe-srservice</finalName>
+                <finalName>srservice</finalName>
 
                 <plugins>
                     <plugin>
@@ -436,7 +457,7 @@
                         <configuration>
 
                             <files>
-                                <file>src/main/resources/baihe-searchRecommend.properties</file>
+                                <file>src/main/resources/sr.properties</file>
                             </files>
                         </configuration>
                         <executions>
@@ -538,7 +559,7 @@
                         <filtering>true</filtering>
                     </resource>
                 </resources>
-                <finalName>baihe-srservice</finalName>
+                <finalName>srservice</finalName>
 
                 <plugins>
                    

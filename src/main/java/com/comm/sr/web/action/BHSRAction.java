@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.comm.sr.common.entity.ThreadShardEntity;
-import com.comm.sr.service.search.BasedSearchService;
-import com.comm.sr.service.SearchServiceFactory;
+import com.comm.sr.common.utils.Constants;
 import com.comm.sr.common.utils.HttpUtils;
-import com.comm.sr.common.utils.ThreadLocalHelper;
+import com.comm.sr.service.ServiceUtils;
+import com.comm.sr.service.vcg.VcgSearchService;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -93,39 +93,39 @@ public class BHSRAction {
         printJsonTemplate(code, msg, data, request, response);
 
     }
-    final static ThreadLocal<ThreadShardEntity> threadShardEntity=new ThreadLocal<ThreadShardEntity>();
     @RequestMapping(value = "/search")
     public void search(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UUID uuid = UUID.randomUUID();
         //每次服务请求对应的唯一id
         String uuidStr = uuid.toString();
         ThreadShardEntity threadShardEntity_=new ThreadShardEntity(uuidStr);
-        threadShardEntity.set(threadShardEntity_);
+        Constants.threadShardEntity.set(threadShardEntity_);
 
         int code = 200;
         String msg = "正常调用";
         Object data = null;
         String parameterErrorMsg = "参数传递错误！";
         String params = request.getParameter("params");
-        String appKey=request.getParameter("appKey");
+       //params= URLDecoder.decode(params,"UTF-8");
+        //String appKey=request.getParameter("appKey");
         try {
-            if(StringUtils.isEmpty(appKey)){
-                code=-100;
-                msg = "搜索服务调用失败，请传递搜索服务标识";
-
-
-
-            }
+//            if(StringUtils.isEmpty(appKey)){
+//                code=-100;
+//                msg = "搜索服务调用失败，请传递搜索服务标识";
+//
+//
+//
+//            }
 
             if (StringUtils.isEmpty(params)) {
                 code=-100;
                 msg = "搜索服务调用失败，请传递搜索查询内容";
             }
             else{
-                BasedSearchService searchService=SearchServiceFactory.srServices.get(appKey);
+                VcgSearchService vcgSearchService= ServiceUtils.getVcgSearchService();
+                data=vcgSearchService.search(params);
 
 
-                data =  searchService.search(params);
             }
         } catch (Exception e) {
             code = -100;
@@ -133,7 +133,7 @@ public class BHSRAction {
             LOGGER.info("搜索服务调用失败，具体异常信息是：" + msg + "");
         }
         printJsonTemplate(code, msg, data, request, response);
-        threadShardEntity.remove();
+        Constants.threadShardEntity.remove();
     }
 
 
@@ -147,7 +147,7 @@ public class BHSRAction {
         result.put("msg", msg);
         ThreadShardEntity threadShardEntity=null;
         try {
-             threadShardEntity= ThreadLocalHelper.getThreadShardEntity();
+             threadShardEntity=Constants.threadShardEntity.get();
         } catch (Exception e) {
             LOGGER.info("error to access threadShardEntity, message is: "+ ExceptionUtils.getMessage(e.getCause())+"");
         }
