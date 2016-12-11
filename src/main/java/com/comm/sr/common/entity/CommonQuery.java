@@ -15,6 +15,7 @@ import java.util.List;
  * @author jasstion
  */
 public class CommonQuery extends AbstractQuery {
+    protected String clusterIdentity=null;
 
     protected String queryStr=null;
 
@@ -56,6 +57,38 @@ public class CommonQuery extends AbstractQuery {
             ", queryStr=" + queryStr +
                 ", locationPoint='" + locationPoint + '\'' +
                 "} " + super.toString();
+    }
+
+    public String getClusterIdentity() {
+        return clusterIdentity;
+    }
+
+    public void setClusterIdentity(String clusterIdentity) {
+        this.clusterIdentity = clusterIdentity;
+    }
+
+    @Override public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CommonQuery)) return false;
+
+        CommonQuery that = (CommonQuery) o;
+
+        if (getClusterIdentity() != null ?
+            !getClusterIdentity().equals(that.getClusterIdentity()) :
+            that.getClusterIdentity() != null) return false;
+        if (getQueryStr() != null ?
+            !getQueryStr().equals(that.getQueryStr()) :
+            that.getQueryStr() != null) return false;
+        if (getSubQuery() != null ?
+            !getSubQuery().equals(that.getSubQuery()) :
+            that.getSubQuery() != null) return false;
+        if (getLocationPoint() != null ?
+            !getLocationPoint().equals(that.getLocationPoint()) :
+            that.getLocationPoint() != null) return false;
+        return !(getDistance() != null ?
+            !getDistance().equals(that.getDistance()) :
+            that.getDistance() != null);
+
     }
 
     @Override
