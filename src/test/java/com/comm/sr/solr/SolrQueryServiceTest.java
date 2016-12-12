@@ -1,104 +1,103 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * To change this license header, choose License Headers in Project Properties. To change this
+ * template file, choose Tools | Templates and open the template in the editor.
  */
 package com.comm.sr.solr;
 
-import com.comm.sr.common.entity.CommonQuery;
-import com.comm.sr.common.entity.QueryItem;
-import com.comm.sr.common.entity.SortItem;
-import com.comm.sr.service.solr.SolrQueryService;
-import com.google.common.collect.Lists;
-import org.junit.*;
-
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
+import org.junit.*;
+
+import com.comm.sr.common.entity.QueryItem;
+import com.comm.sr.common.entity.SolrCommonQuery;
+import com.comm.sr.common.entity.SortItem;
+import com.comm.sr.common.solr.SolrQueryService;
+import com.google.common.collect.Lists;
 
 /**
- *
  * @author jasstion
  */
 public class SolrQueryServiceTest {
 
-    SolrQueryService service = new SolrQueryService(null,new Properties());
-    CommonQuery commonQuery = new CommonQuery();
+  SolrQueryService service = new SolrQueryService(null, new Properties());
+  String collectionName = "";
+  SolrCommonQuery commonQuery = new SolrCommonQuery(collectionName);
 
-    public SolrQueryServiceTest() {
-    }
+  public SolrQueryServiceTest() {
+  }
 
-    @BeforeClass
-    public static void setUpClass() {
-    }
+  @BeforeClass
+  public static void setUpClass() {
+  }
 
-    @AfterClass
-    public static void tearDownClass() {
-    }
+  @AfterClass
+  public static void tearDownClass() {
+  }
 
-    @Before
-    public void setUp() {
-        QueryItem queryItem = new QueryItem("height", Lists.newArrayList("158TO159", "178#TO# 179"));
-        QueryItem queryItem1 = new QueryItem("age", Lists.newArrayList("1988", "1999"));
-        QueryItem queryItem2 = new QueryItem("gender", Lists.newArrayList("0"));
-        QueryItem queryItem_date = new QueryItem("registeDate", Lists.newArrayList("2014-02-15T18:59:51ZTO2015-02-15T18:59:51Z", "2009-02-15T18:59:51Z#TO#2011-02-15T18:59:51Z"));
-        queryItem_date.setIsFilterType(true);
-        queryItem2.setIsFilterType(true);
-        List<QueryItem> items = Lists.newArrayList(queryItem, queryItem1, queryItem2, queryItem_date);
-        commonQuery.setQueryItems(items);
-        commonQuery.setFls(Lists.newArrayList("userID", "height","dynValue","score","nickname"));
-        List<SortItem> sortItems = Lists.newArrayList();
-        SortItem sortItem = new SortItem();
-        sortItem.setFieldName("age");
-        sortItem.setSort("desc");
-        SortItem sortItem1 = new SortItem();
-        sortItem1.setFieldName("height");
-        sortItem1.setSort("desc");
-        SortItem sortItem3 = new SortItem();
-        sortItem3.setFieldName("registeDate");
-        sortItem3.setSort("desc");
-        sortItems = Lists.newArrayList(sortItem, sortItem1, sortItem3);//
-       // commonQuery.setSortItems(sortItems);
-        commonQuery.setGender(0);
-        commonQuery.setCacheStrategy("100");
-        List<String> functionQueryList=Lists.newArrayList();
-        functionQueryList.add("product(dynValue,100)");
-        commonQuery.setFunctionQuerysList(functionQueryList);
-    }
+  public static void main(String[] args) {
 
-    @After
-    public void tearDown() {
-    }
+  }
 
-    /**
-     * Test of query method, of class SolrQueryService.
-     */
-    @Test
-    public void testQuery() throws Exception {
-        List<Map<String, Object>> results = service.query(commonQuery);
-        for (Map<String, Object> result : results) {
-            System.out.print(result.get("userID") + "\n"+result.get("nickname"));
-        }
+  @Before
+  public void setUp() {
+    QueryItem queryItem = new QueryItem("height", Lists.newArrayList("158TO159", "178#TO# 179"));
+    QueryItem queryItem1 = new QueryItem("age", Lists.newArrayList("1988", "1999"));
+    QueryItem queryItem2 = new QueryItem("gender", Lists.newArrayList("0"));
+    QueryItem queryItem_date = new QueryItem("registeDate",
+        Lists.newArrayList("2014-02-15T18:59:51ZTO2015-02-15T18:59:51Z",
+          "2009-02-15T18:59:51Z#TO#2011-02-15T18:59:51Z"));
+    queryItem_date.setIsFilterType(true);
+    queryItem2.setIsFilterType(true);
+    List<QueryItem> items = Lists.newArrayList(queryItem, queryItem1, queryItem2, queryItem_date);
+    commonQuery.setFls(Lists.newArrayList("userID", "height", "dynValue", "score", "nickname"));
+    List<SortItem> sortItems = Lists.newArrayList();
+    SortItem sortItem = new SortItem();
+    sortItem.setFieldName("age");
+    sortItem.setSort("desc");
+    SortItem sortItem1 = new SortItem();
+    sortItem1.setFieldName("height");
+    sortItem1.setSort("desc");
+    SortItem sortItem3 = new SortItem();
+    sortItem3.setFieldName("registeDate");
+    sortItem3.setSort("desc");
+    sortItems = Lists.newArrayList(sortItem, sortItem1, sortItem3);//
+    // commonQuery.setSortItems(sortItems);
+    commonQuery.setCacheStrategy("100");
+    List<String> functionQueryList = Lists.newArrayList();
+    functionQueryList.add("product(dynValue,100)");
+    commonQuery.setFunctionQuerysList(functionQueryList);
+  }
 
-    }
+  @After
+  public void tearDown() {
+  }
 
-    /**
-     * Test of processQuery method, of class SolrQueryService.
-     */
-    @Test
-    public void testProcessQuery() throws Exception {
-        CommonQuery bq=new CommonQuery();
-        List<Map<String, Object>> results = service.processQuery(commonQuery);
-        for (Map<String, Object> result : results) {
-            System.out.print(result.get("userID") + "\n");
-             System.out.print(result.get("dynValue") + "\n");
-              System.out.print(result.get("score") + "\n");
-        }
+  /**
+   * Test of query method, of class SolrQueryService.
+   */
+  @Test
+  public void testQuery() throws Exception {
+    // List<Map<String, Object>> results = service.query(commonQuery);
+    // for (Map<String, Object> result : results) {
+    // System.out.print(result.get("userID") + "\n"+result.get("nickname"));
+    // }
 
-    }
-    public static void main(String[] args) {
+  }
 
-    }
+  /**
+   * Test of processQuery method, of class SolrQueryService.
+   */
+  @Test
+  public void testProcessQuery() throws Exception {
+    // CommonQuery bq=new CommonQuery();
+    // List<Map<String, Object>> results = service.processQuery(commonQuery);
+    // for (Map<String, Object> result : results) {
+    // System.out.print(result.get("userID") + "\n");
+    // System.out.print(result.get("dynValue") + "\n");
+    // System.out.print(result.get("score") + "\n");
+    // }
+
+  }
 
 }

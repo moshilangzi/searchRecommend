@@ -5,6 +5,5 @@ package com.comm.sr.service.topic;
  */
 public interface TopicService {
 
-
-    public void publishTopicMessage(String topic,String message);
+  public void publishTopicMessage(String topic, String message);
 }
