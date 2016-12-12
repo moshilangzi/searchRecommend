@@ -4,12 +4,10 @@
  */
 package com.comm.sr.common.solr;
 
-import com.comm.sr.common.core.AbstractQueryService;
-import com.comm.sr.common.core.QueryGenerator;
-import com.comm.sr.common.entity.SolrCommonQuery;
-import com.comm.sr.service.cache.CacheService;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import org.apache.http.client.HttpClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.CloudSolrServer;
@@ -20,9 +18,12 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import com.comm.sr.common.core.AbstractQueryService;
+import com.comm.sr.common.core.QueryGenerator;
+import com.comm.sr.common.entity.SolrCommonQuery;
+import com.comm.sr.service.cache.CacheService;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * @author jasstion

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="baihe-analysis:war">
+    <output-path>$PROJECT_DIR$/../../baihe_work/baihe-analysis/target</output-path>
+    <root id="archive" name="baihe-analysis.war.war">
+      <element id="artifact" artifact-name="baihe-analysis:war exploded" />
+    </root>
+  </artifact>
+</component>
