@@ -25,6 +25,9 @@ and open the template in the editor.
             //  alert(textType);
             scoreScript = $('#scoreScript').val();
             fetchSize = $('#fetchSize').val();
+            newImageMeragePolicy=$('#newImageMeragePolicy').val();
+            ifUseSecondSortBasedDate=$('#ifUseSecondSortBasedDate').is(":checked");
+
             //alert(scoreScript)
 
 
@@ -33,8 +36,12 @@ and open the template in the editor.
             paramsObj.queryText = inputText;
             paramsObj.fetchSize=fetchSize;
             paramsObj.scoreScript = scoreScript;
+            paramsObj.newImageMeragePolicy=newImageMeragePolicy;
+            paramsObj.ifUseSecondSortBasedDate=ifUseSecondSortBasedDate;
             paramsStr = JSON.stringify(paramsObj);
-          //  alert(paramsStr)
+
+
+          alert(paramsStr)
             paramsStr= encodeURIComponent(paramsStr);
           //  alert(paramsStr)
 
@@ -109,7 +116,10 @@ and open the template in the editor.
     </div>
     <ul class="list">
         <li>h表示以当前时间为基准,过去多少小时上传的图片被认为最新图片</li>
-        <li>时间二次排序表示搜索过程中不对图片进行日期相关的排序,仅仅针对最终的搜索结果进行二次排序将最新图片打乱加入结果集中</li>
+        <li>时间二次排序表示搜索过程中不对图片进行日期相关的排序,仅仅针对最终的搜索结果进行二次排序将最新图片打乱加入结果集中
+        ,打乱的方式：
+            1：简单的每页一半新图放在好图后面，2：新图和好图随机打乱
+        </li>
         <li>如果不选择二次排序,则系统将默认利用es的score机制基于已有的payload总分加上日期相关的权重进行排序</li>
     </ul>
 </div>
@@ -121,14 +131,17 @@ and open the template in the editor.
 
     <input type="text" placeholder="请输入查询内容" id="queryStr">
 </div>
-<%--<div class="ui input hidden">--%>
 
-    <%--<input type="text" placeholder="请输入变量h" id="withinHours" >--%>
-<%--</div>--%>
-<%--<div class="ui  checkbox hidden">--%>
-    <%--<input type="checkbox" name="ifUseSecondSortBasedDate" >--%>
-    <%--<label>时间二次排序</label>--%>
-<%--</div>--%>
+<select class="ui dropdown" id="newImageMeragePolicy">
+    <option value="0">随机打乱</option>
+    <option value="1">新图在后好图在前</option>
+    <%--<option value="2">间隔交叉</option>--%>
+</select>
+
+<div class="ui  checkbox hidden">
+    <input type="checkbox" id="ifUseSecondSortBasedDate"  >
+    <label>时间二次排序</label>
+</div>
 
 <div class="ui massive icon input">
     <input type="text" placeholder="scoreScript" id="scoreScript">

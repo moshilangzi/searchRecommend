@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../baihe_work/baihe-analysis/baihe-analysis.iml" filepath="$PROJECT_DIR$/../../baihe_work/baihe-analysis/baihe-analysis.iml" />
       <module fileurl="file://$PROJECT_DIR$/searchRecommend.iml" filepath="$PROJECT_DIR$/searchRecommend.iml" />
     </modules>
   </component>

@@ -24,8 +24,16 @@
         <processorPath useClasspath="true" />
         <module name="searchRecommend" />
       </profile>
+      <profile default="false" name="Annotation profile for baihe-analysis" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="baihe-analysis" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="baihe-analysis" target="1.8" />
       <module name="searchRecommend" target="1.8" />
     </bytecodeTargetLevel>
   </component>

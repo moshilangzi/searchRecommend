@@ -5,6 +5,7 @@ import com.comm.sr.common.core.AbstractQueryService;
 import com.comm.sr.common.elasticsearch.EsQueryGenerator;
 import com.comm.sr.common.entity.EsCommonQuery;
 import com.comm.sr.common.entity.QueryItem;
+import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
 import com.comm.sr.common.utils.DateTimeUtil;
 import com.comm.sr.common.utils.GsonHelper;
@@ -90,15 +91,35 @@ public class VcgSearchService extends AbstractComponent{
 
 
     finalQuery.setSubQuerys(Lists.newArrayList(filterQuery,preKeyQuery));
-    EsCommonQuery query = new EsCommonQuery(1, searchParams.getFetchSize(), null, Lists.newArrayList("prekey","id"), indexName, typeName);
+    EsCommonQuery query = new EsCommonQuery(1, searchParams.getFetchSize()/2, null, Lists.newArrayList("prekey","id"), indexName, typeName);
     query.setScoreScript(scoreScript);
     query.setSubQuery(finalQuery);
+    query.setClusterIdentity("vcgTest");
     EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(query);
+
     logger.info(esQueryWrapper.getSearchSourceBuilder().toString());
 
 
     final  String imageDomain="http://goss1.asiacn.vcg.com/";
     List<Map<String, String>> results_= queryService.query(query);
+    if(searchParams.isIfUseSecondSortBasedDate()){
+      //二次排序
+      query.setScoreScript(null);
+      SortItem dateItem=new SortItem();
+      dateItem.setFieldName("uploadTime");
+      dateItem.setSort("desc");
+      query.setSortItems(Lists.newArrayList(dateItem));
+      esQueryWrapper= new EsQueryGenerator().generateFinalQuery(query);
+
+      logger.info("日期排序查询："+esQueryWrapper.getSearchSourceBuilder().toString());
+
+      List<Map<String,String>> results_new=queryService.query(query);
+
+      results_= merageNewImage(results_,results_new,searchParams.getNewImageMeragePolicy());
+    }
+
+
+
     List<String> imageIds=Lists.newArrayList();
     Map<String,Integer> idIndexMap=Maps.newHashMap();
 
@@ -112,6 +133,7 @@ public class VcgSearchService extends AbstractComponent{
     for(int i=0;i<imagesMapList.size();i++ ){
       idIndexMap.put(String.valueOf(imagesMapList.get(i).get("id")),i);
     }
+
 
     for (Map<String,String> user:results_) {
       String id=String.valueOf(user.get("id"));
@@ -150,19 +172,98 @@ public class VcgSearchService extends AbstractComponent{
 
   }
 
+  private List<Map<String, String>> merageNewImage(List<Map<String, String>> results_,
+      List<Map<String, String>> results_new,int meragePolicy) {
+    List<Map<String, String>> finalResults=Lists.newArrayList();
+    if(meragePolicy==0){
+      finalResults= new MeragerRandom().merage(results_,results_new);
+
+    }
+    if(meragePolicy==1){
+      finalResults= new MeragerSimple().merage(results_,results_new);
+
+    }
+    if(meragePolicy==2){
+      finalResults= new MeragerInterval().merage(results_,results_new);
+
+    }
+    return finalResults;
 
 
 
-public static class SearchParams{
+  }
+
+
+  public static interface   NewImageMerager{
+    public List<Map<String, String>> merage(List<Map<String, String>> results_,
+        List<Map<String, String>> results_new);
+
+  }
+  public static class MeragerRandom implements NewImageMerager{
+
+    @Override public List<Map<String, String>> merage(List<Map<String, String>> results_,
+        List<Map<String, String>> results_new) {
+      List<Map<String, String>> finalResults=Lists.newArrayList();
+      finalResults.addAll(results_);
+      finalResults.addAll(results_new);
+      Collections.shuffle(finalResults);
+
+      return finalResults;
+    }
+  }
+  public static class MeragerSimple implements NewImageMerager{
+
+     public List<Map<String, String>> merage(List<Map<String, String>> results_,
+        List<Map<String, String>> results_new) {
+       List<Map<String, String>> finalResults=Lists.newArrayList();
+       finalResults.addAll(results_);
+       finalResults.addAll(results_new);
+
+       return finalResults;
+    }
+  }
+  public static class MeragerInterval implements NewImageMerager{
+
+    @Override public List<Map<String, String>> merage(List<Map<String, String>> results_,
+        List<Map<String, String>> results_new) {
+      List<Map<String, String>> finalResults=Lists.newArrayList();
+      int interval=3;
+      int totalSize=results_.size()+results_new.size();
+      for(int i=0;i<totalSize;i+=interval){
+         finalResults.addAll(results_.subList(i,i+interval));
+
+
+
+      }
+
+
+
+
+      return finalResults;
+
+    }
+  }
+
+  public static class SearchParams{
   String queryText=null;
   String scoreScript=null;
   int withHours=0;
   int fetchSize=100;
   boolean ifUseSecondSortBasedDate=false;
+  //1：简单的每页一半新图放在好图后面，2：新图和好图随机打乱， 3：新图和好图间隔固定数量交叉出现
+  int newImageMeragePolicy=1;
 
   public SearchParams() {
     super();
 
+  }
+
+  public int getNewImageMeragePolicy() {
+    return newImageMeragePolicy;
+  }
+
+  public void setNewImageMeragePolicy(int newImageMeragePolicy) {
+    this.newImageMeragePolicy = newImageMeragePolicy;
   }
 
   public int getFetchSize() {
@@ -238,20 +339,18 @@ public static class SearchParams{
 
 public static void main(String[] args) throws Exception {
 
-  String scoreScript="long uploadTime=doc['uploadTime'].value;def now = new Date() ;long comparedTime=now.getTime()-uploadTime; int hours=comparedTime/1000/60/60/24/1000000;if (hours>3) _score; else _score+100.0";
+  String scoreScript=null;//"long uploadTime=doc['uploadTime'].value;def now = new Date() ;long comparedTime=now.getTime()-uploadTime; int hours=comparedTime/1000/60/60/24/1000000;if (hours>3) _score; else _score+100.0";
 
 
   String inputText="蓝天";
-  boolean ifUseSecondSortBasedDate=false;
   int withinHours=24*3;
 
   SearchParams searchParams=new SearchParams();
-  searchParams.setIfUseSecondSortBasedDate(ifUseSecondSortBasedDate);
   searchParams.setQueryText(inputText);
   searchParams.setScoreScript(scoreScript);
-  searchParams.setWithHours(24*3);
   searchParams.setFetchSize(12);
-
+  searchParams.setIfUseSecondSortBasedDate(true);
+  searchParams.setNewImageMeragePolicy(1);
   VcgSearchService vcgSearchService= ServiceUtils.getVcgSearchService();
   String queryStr=GsonHelper.objToJson(searchParams);
   String encodeStr=URLEncoder.encode(queryStr, "UTF-8");
@@ -287,6 +386,7 @@ public static void main(String[] args) throws Exception {
     clause.append("(").append(org.apache.commons.lang3.StringUtils.join(imageIds,",")).append(")");
 
     String sql="select * from resource where id in "+clause.toString();
+    logger.debug(sql);
     results=con.createQuery(sql).executeAndFetchTable().asList();
 
 

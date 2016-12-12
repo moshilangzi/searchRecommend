@@ -10,8 +10,8 @@ import com.comm.sr.common.elasticsearch.EsQueryGenerator;
 import com.comm.sr.common.elasticsearch.EsQueryService;
 import com.comm.sr.common.entity.EsCommonQuery;
 import com.comm.sr.common.entity.QueryItem;
+import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
-import com.comm.sr.common.utils.GsonHelper;
 import com.google.common.collect.Lists;
 import org.junit.*;
 
@@ -24,11 +24,9 @@ import java.util.Properties;
  * @author jasstion
  */
 public class EsQueryServiceTest {
-   // public static final NodeTestUtils nodeTestUtils=new NodeTestUtils();
 
 
-    String indexName="com";
-    String typeName="user";
+
     public EsQueryServiceTest() {
     }
 
@@ -70,46 +68,56 @@ public class EsQueryServiceTest {
 
 
 
-        indexName="vcg_creative";
-        typeName="vcgcsdn";
-        SubQuery subQuery2=new SubQuery();
-        subQuery2.setLogic("AND");
-        SubQuery item1=new SubQuery();
-        QueryItem qi=new QueryItem("onlineState",Lists.newArrayList("1"),false);
+        List<QueryItem> items = Lists.newArrayList();
+        QueryItem queryItem=new QueryItem("des",Lists.newArrayList("box"));
+        //queryItem.setIsPayload(true);
+       // items.add(queryItem);
+        SubQuery subQuery=new SubQuery();
+        subQuery.setLogic("AND");
+      List<SubQuery> subQueries=Lists.newArrayList();
+      SubQuery payloadQuery=new SubQuery();
+      QueryItem queryItem1=new QueryItem();
+      queryItem1.setFieldName("des");
+      queryItem1.setIsPayload(true);
+      queryItem1.setMatchedValues(Lists.newArrayList("basket","football"));
 
-        qi.setIsFilterType(true);
-        item1.setQueryItem(qi);
-        SubQuery item2=new SubQuery();
-        item2.setQueryItem(new QueryItem("prekey3", Lists.newArrayList("4165"), true));
-        subQuery2.setSubQuerys(Lists.newArrayList(item1,item2));
-        EsCommonQuery query = new EsCommonQuery(1, 5, null, Lists.newArrayList("_score","prekey3","resId","_id"), indexName, typeName);
-        query.setScoreScript("1.0*_score");
-        query.setSubQuery(subQuery2);
-        System.out.print(GsonHelper.objToJson(query) + "\n");
-        EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(query);
+      payloadQuery.setQueryItem(queryItem1);
+      subQueries.add(payloadQuery);
 
-
+        subQuery.setSubQuerys(subQueries);
 
 
+        final List<String> fls = Lists.newArrayList("userId","des","name","age");
+      String indexName="com";
+      String typeName="user";
+        List<SortItem> sortItems = Lists.newArrayList();
+        //logstash-2015.12.10 log4j
+        //EsCommonQuery baiheQuery = new EsCommonQuery(items, 1, 18, sortItems, fls, "baihe_user", "user");
+        EsCommonQuery baiheQuery = new EsCommonQuery(1, 5, sortItems, fls, indexName, typeName);
+        baiheQuery.setSubQuery(subQuery);
+        baiheQuery.setClusterIdentity("test");
+        //baiheQuery.setScoreScript("100*_score");
 
 
 
+
+        EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(baiheQuery);
 
         System.out.print(esQueryWrapper.getSearchSourceBuilder().toString());
         Properties settings=new Properties();
-        settings.put("elasticSearchHosts",":9300");
-        settings.put("redis.ip","localhost");
-        settings.put("redis.port","6379");
+      settings.put("elastic.test.hosts","127.0.0.1:9308");
+      settings.put("elastic.test.clusterName","elasticsearch");
+
 
         //CacheService<String,String> cacheService=new RedisCacheService(settings);
         EsQueryService esQueryService =new EsQueryService(settings,null);
-        List<Map<String, Object>> results = esQueryService.query(query);
+        List<Map<String, Object>> results = esQueryService.query(baiheQuery);
         System.out.print(results.size()+"\n");
         for (Map<String,Object> user:results) {
-            Object content =  user.get("resId");
+            Object content =  user.get("userId");
             //String c1=new String(content.getBytes(),"utf8");
             System.out.print(content+"\n");
-            System.out.print(user.get("_score")+"\n");
+            System.out.print(user.get("score")+"\n");
         }
 
 

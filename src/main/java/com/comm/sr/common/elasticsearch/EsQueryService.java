@@ -46,7 +46,7 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
             Set<String> esClusterIdentitys= Sets.newHashSet();
             for(String propertyName:properyNames){
                 if(propertyName.startsWith("elastic")){
-                    esClusterIdentitys.add(propertyName.split(".")[1]);
+                    esClusterIdentitys.add(propertyName.split("\\.")[1]);
 
 
                 }

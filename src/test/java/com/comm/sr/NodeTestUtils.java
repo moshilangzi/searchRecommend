@@ -116,7 +116,7 @@ public  class NodeTestUtils {
 
       client.prepareIndex(indexName, typeName, "4")
           .setSource(XContentFactory.jsonBuilder().startObject()
-                  .field("des", "football|100.0")
+                  .field("des", "football|0.0")
                   .field("name","jack award")
                   .field("age",12300)
                   .field("userId",4)
