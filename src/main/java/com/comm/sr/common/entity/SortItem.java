@@ -14,6 +14,7 @@ public class SortItem implements Serializable {
   protected String fieldName;
   // age:asc or age:desc
   protected String sort;
+
   public SortItem() {
     super();
   }

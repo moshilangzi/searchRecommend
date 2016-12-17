@@ -8,43 +8,76 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 
 import com.comm.sr.common.core.AbstractQueryService;
 import com.comm.sr.common.entity.EsCommonQuery;
 import com.comm.sr.service.cache.CacheService;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * @author jasstion
  */
 public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
 
+  protected final Map<String, TransportClient> clientMap = Maps.newHashMap();
   private Properties settings = null;
-  private TransportClient client = null;
 
   public EsQueryService(Properties settings, CacheService<String, String> cacheService) {
     super(cacheService, settings);
+    try {
 
-    String hosts = settings.getProperty("elasticSearchHosts");
-    String clusterName = settings.getProperty("elasticSearchClusterName");
-    Settings esSettings = Settings.settingsBuilder().put("cluster.name", clusterName).build();
-    client = TransportClient.builder().settings(esSettings).build();
+      Set<String> properyNames = settings.stringPropertyNames();
+      Set<String> esClusterIdentitys = Sets.newHashSet();
+      for (String propertyName : properyNames) {
+        if (propertyName.startsWith("elastic")) {
+          esClusterIdentitys.add(propertyName.split("\\.")[1]);
 
-    for (String host : hosts.split(";")) {
+        }
 
-      try {
-        client.addTransportAddress(new InetSocketTransportAddress(
-            InetAddress.getByName(host.split(":")[0]), Integer.parseInt(host.split(":")[1])));
-      } catch (Exception e) {
-        logger.error("error to get elasticsearch client!");
       }
 
+      for (String identity : esClusterIdentitys) {
+        String hosts = null;
+        String clusterName = null;
+        for (String propertyName : properyNames) {
+          if (propertyName.startsWith("elastic." + identity + ".clusterName")) {
+            clusterName = settings.getProperty(propertyName);
+          }
+          if (propertyName.startsWith("elastic." + identity + ".hosts")) {
+            hosts = settings.getProperty(propertyName);
+          }
+
+        }
+        Settings esSettings = Settings.settingsBuilder().put("cluster.name", clusterName).build();
+
+        TransportClient client = TransportClient.builder().settings(esSettings).build();
+
+        for (String host : hosts.split(";")) {
+
+          try {
+            client.addTransportAddress(new InetSocketTransportAddress(
+                InetAddress.getByName(host.split(":")[0]), Integer.parseInt(host.split(":")[1])));
+          } catch (Exception e) {
+            logger.error("error to get elasticsearch client!");
+          }
+
+        }
+        clientMap.put(identity, client);
+
+      }
+
+    } catch (Exception e) {
+      throw new RuntimeException("can not connect to elastic cluster! program will exit!");
     }
 
   }
@@ -57,13 +90,17 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
 
   @Override
   public List<Map<String, Object>> query(EsCommonQuery baiheQuery) throws Exception {
+    String clusteridentity = baiheQuery.getClusterIdentity();
+    TransportClient client = clientMap.get(clusteridentity);
     List<Map<String, Object>> results = Lists.newArrayList();
     EsQueryGenerator.EsQueryWrapper esQueryWrapper =
         new EsQueryGenerator().generateFinalQuery(baiheQuery);
     SearchResponse searchResponse =
         client.prepareSearch().setSource(esQueryWrapper.getSearchSourceBuilder().toString())
             .setIndices(esQueryWrapper.getIndexName()).execute().actionGet();
-    for (SearchHit hit : searchResponse.getHits().getHits()) {
+    SearchHits searchHits = searchResponse.getHits();
+    long totalCount = searchHits.getTotalHits();
+    for (SearchHit hit : searchHits.getHits()) {
       Map<String, Object> values = hit.getSource();
       values.put("score", hit.getScore());
 
@@ -73,6 +110,36 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
 
     return results;
 
+  }
+
+  @Override
+  public Map<String, Object> queryAll(EsCommonQuery baiheQuery) throws Exception {
+    String clusteridentity = baiheQuery.getClusterIdentity();
+    TransportClient client = clientMap.get(clusteridentity);
+    Map<String, Object> finalResults = Maps.newHashMap();
+    List<Map<String, Object>> results = Lists.newArrayList();
+    EsQueryGenerator.EsQueryWrapper esQueryWrapper =
+        new EsQueryGenerator().generateFinalQuery(baiheQuery);
+    SearchResponse searchResponse =
+        client.prepareSearch().setSource(esQueryWrapper.getSearchSourceBuilder().toString())
+            .setIndices(esQueryWrapper.getIndexName()).execute().actionGet();
+    SearchHits searchHits = searchResponse.getHits();
+    long totalCount = searchHits.getTotalHits();
+    for (SearchHit hit : searchHits.getHits()) {
+      Map<String, Object> values = hit.getSource();
+      values.put("score", hit.getScore());
+
+      results.add(values);
+
+    }
+
+    Map<String, Object> exInfo = Maps.newHashMap();
+    exInfo.put("totalCount", totalCount);
+
+    finalResults.put("exInfo", exInfo);
+    finalResults.put("conInfo", results);
+
+    return finalResults;
   }
 
 }

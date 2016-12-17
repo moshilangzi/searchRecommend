@@ -20,10 +20,12 @@ public class QueryItem implements Serializable {
   // range: * TO 100, 2015-07-06T08:52:48Z TO 2015-07-06T08:52:48Z, disperse: 20, "married"...
   // -means not match following query
   List<String> matchedValues = Lists.newArrayList();
+
   public QueryItem(String fieldName, List<String> matchedValues) {
     this.fieldName = fieldName;
     this.matchedValues = matchedValues;
   }
+
   public QueryItem(String fieldName, List<String> matchedValues, boolean isPayload) {
     this.fieldName = fieldName;
     this.matchedValues = matchedValues;

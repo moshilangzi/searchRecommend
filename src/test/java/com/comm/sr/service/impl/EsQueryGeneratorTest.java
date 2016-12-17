@@ -58,6 +58,7 @@ public class EsQueryGeneratorTest {
     QueryItem queryItem1 = new QueryItem("des", Lists.newArrayList("boss"));
     queryItem1.setIsPayload(true);
     SubQuery subQuery1 = new SubQuery("NOT", queryItem1);
+
     subQuery1.setSubQuerys(Lists.newArrayList(
       new SubQuery("AND", new QueryItem("age", Lists.newArrayList("1220TO1230"))),
       new SubQuery("AND", new QueryItem("age", Lists.newArrayList("12200TO12300")))));
@@ -84,12 +85,18 @@ public class EsQueryGeneratorTest {
 
     qi.setIsFilterType(true);
     item1.setQueryItem(qi);
+
+    SubQuery item3 = new SubQuery();
+    QueryItem qi3 = new QueryItem("online", Lists.newArrayList("1"), false);
+
+    qi3.setIsFilterType(true);
+    item3.setQueryItem(qi3);
     SubQuery item2 = new SubQuery();
     item2.setQueryItem(new QueryItem("prekey3", Lists.newArrayList("4165"), true));
-    subQuery2.setSubQuerys(Lists.newArrayList(item1, item2));
+    subQuery2.setSubQuerys(Lists.newArrayList(item1, item2, item3));
     EsCommonQuery query =
         new EsCommonQuery(1, 5, null, Lists.newArrayList("_score", "prekey3"), indexName, typeName);
-    query.setScoreScript("1.0*_score");
+    // query.setScoreScript("1.0*_score");
     query.setSubQuery(subQuery2);
     System.out.print(GsonHelper.objToJson(query) + "\n");
     EsQueryGenerator.EsQueryWrapper esQueryWrapper =

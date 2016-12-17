@@ -1,11 +1,6 @@
 package com.comm.sr;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collection;
-
+import com.google.common.collect.Lists;
 import org.elasticsearch.Version;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
@@ -18,7 +13,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.xbib.elasticsearch.plugin.payload.PayloadPlugin;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Created by jasstion on 19/10/2016.

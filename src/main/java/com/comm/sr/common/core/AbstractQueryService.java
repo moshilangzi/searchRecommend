@@ -1,6 +1,7 @@
 /*
- * To change this license header, choose License Headers in Project Properties. To change this
- * template file, choose Tools | Templates and open the template in the editor.
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package com.comm.sr.common.core;
 
@@ -18,124 +19,127 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 /**
- * use to do some common task such as : save query log, process query result cache... this
- * implemention is thread safe
+ * use to do some common task such as : save query log, process query result
+ * cache... this implemention is thread safe
+ *
  * @author jasstion
  */
-public abstract class AbstractQueryService<Q extends AbstractQuery> extends AbstractComponent {
+public abstract class AbstractQueryService<Q extends AbstractQuery> extends AbstractComponent{
 
-  public final static ThreadLocal<Boolean> ifUseCache = new ThreadLocal<Boolean>();
-  public final static String PRE_KEY = "querycachekey_";
-  final static GsonBuilder g = new GsonBuilder();
-  final static Gson gson = g.create();
-  public static Set<String> filterFieldNmae =
-      Sets.newHashSet("shape", "residencepProvince", "province", "education", "corporationNature",
-        "industry", "income", "loveType", "matchIncome", "lastLoginDate");
-  protected Properties settings;
-  protected CacheService<String, String> cacheService;
+    public final static ThreadLocal<Boolean> ifUseCache = new ThreadLocal<Boolean>();
 
-  public AbstractQueryService(CacheService<String, String> cacheService, Properties settings) {
-    super(settings);
-    this.cacheService = cacheService;
-    this.settings = settings;
+    final static GsonBuilder g = new GsonBuilder();
 
-  }
+    final static Gson gson = g.create();
+    public final static String PRE_KEY ="querycachekey_";
 
-  public List<Map<String, Object>> processQuery(Q baiheQuery) throws Exception {
+   protected Properties settings;
+    protected CacheService<String,String> cacheService;
 
-    long timeTaken = 0;
-    boolean cacheHit = false;
-    List<Map<String, Object>> queryResult = null;
-    StopWatch stopWatch = new StopWatch();
+    public static Set<String> filterFieldNmae = Sets.newHashSet("shape", "residencepProvince", "province", "education", "corporationNature", "industry", "income", "loveType", "matchIncome", "lastLoginDate");
 
-    // Start the watch, do some task and stop the watch.
-    stopWatch.start();
+    public AbstractQueryService(CacheService<String, String> cacheService, Properties settings) {
+        super(settings);
+        this.cacheService=cacheService;
+        this.settings=settings;
 
-    queryResult = this.queryCache(baiheQuery);
-    if (queryResult != null && queryResult.size() > 1) {
-      cacheHit = true;
-      AbstractQueryService.QueryStatistics queryStatistics =
-          new QueryStatistics(timeTaken, cacheHit);
-      stopWatch.stop();
-      timeTaken = stopWatch.getTime();
-      this.recordQueryLog(queryStatistics);
-      return queryResult;
-    }
-    cacheHit = false;
-    queryResult = this.query(baiheQuery);
-    stopWatch.stop();
-    timeTaken = stopWatch.getTime();
-
-    AbstractQueryService.QueryStatistics queryStatistics = new QueryStatistics(timeTaken, cacheHit);
-    this.recordQueryLog(queryStatistics);
-    this.cacheQueryResult(baiheQuery, queryResult);
-
-    return queryResult;
-
-  }
-
-  public abstract List<Map<String, Object>> query(Q baiheQuery) throws Exception;
-
-  public void cacheQueryResult(Q baiheQuery, List<Map<String, Object>> queryResult) {
-    String cacheStr = baiheQuery.getCacheStrategy();
-    String key = PRE_KEY + baiheQuery.hashCode();
-    if (queryResult == null || queryResult.size() < 1) {
-      return;
-    }
-    ifUseCache.set(Boolean.TRUE);
-    String queryResultJson = gson.toJson(queryResult);
-    if (cacheService == null) {
-      return;
-    }
-    if (cacheStr == null || cacheStr.trim().length() < 1) {
-      // default not to set cache
-      // valueOperations.set(key, queryResultJson);
-    } else {
-      cacheService.set(key, queryResultJson, Integer.parseInt(cacheStr), TimeUnit.SECONDS);
 
     }
-  }
 
-  public List<Map<String, Object>> queryCache(Q baiheQuery) {
-    if (cacheService == null) {
-      return null;
+    public List<Map<String, Object>> processQuery(Q baiheQuery) throws Exception {
+
+        long timeTaken = 0;
+        boolean cacheHit = false;
+        List<Map<String, Object>> queryResult = null;
+        StopWatch stopWatch = new StopWatch();
+
+        // Start the watch, do some task and stop the watch.
+        stopWatch.start();
+
+        queryResult = this.queryCache(baiheQuery);
+        if (queryResult != null && queryResult.size() > 1) {
+            cacheHit = true;
+            QueryStatistics queryStatistics = new QueryStatistics(timeTaken, cacheHit);
+            stopWatch.stop();
+            timeTaken = stopWatch.getTime();
+            this.recordQueryLog(queryStatistics);
+            return queryResult;
+        }
+        cacheHit = false;
+        queryResult = this.query(baiheQuery);
+        stopWatch.stop();
+        timeTaken = stopWatch.getTime();
+
+        QueryStatistics queryStatistics = new QueryStatistics(timeTaken, cacheHit);
+        this.recordQueryLog(queryStatistics);
+        this.cacheQueryResult(baiheQuery, queryResult);
+
+        return queryResult;
 
     }
-    List<Map<String, Object>> queryResult = null;
-    String key = PRE_KEY + baiheQuery.hashCode();
 
-    String queryResultJson = cacheService.get(key);
-    if (queryResultJson == null) {
-      return null;
-    }
-    queryResult = gson.fromJson(queryResultJson, new TypeToken<ArrayList<Map<String, Object>>>() {
-    }.getType());
-    return queryResult;
+    public abstract List<Map<String, Object>> query(Q baiheQuery) throws Exception;
+    public abstract Map<String,Object> queryAll(Q baiheQuery) throws Exception;
 
-  }
+    public void cacheQueryResult(Q baiheQuery, List<Map<String, Object>> queryResult) {
+        String cacheStr = baiheQuery.getCacheStrategy();
+        String key = PRE_KEY + baiheQuery.hashCode();
+        if (queryResult == null || queryResult.size() < 1) {
+            return;
+        }
+        ifUseCache.set(Boolean.TRUE);
+        String queryResultJson = gson.toJson(queryResult);
+        if(cacheService==null){
+            return;
+        }
+        if (cacheStr == null || cacheStr.trim().length() < 1) {
+            //default not to set cache
+            // valueOperations.set(key, queryResultJson);
+        } else {
+            cacheService.set(key, queryResultJson, Integer.parseInt(cacheStr), TimeUnit.SECONDS);
 
-  public void recordQueryLog(QueryStatistics queryStatistics) {
-    logger.info(queryStatistics.toString());
-
-  }
-
-  public static class QueryStatistics {
-
-    // seconds
-    private long queryTakenTime = 0;
-    private boolean cacheHit = false;
-
-    public QueryStatistics(long queryTakenTim, boolean cacheHit) {
-      this.queryTakenTime = queryTakenTim;
-      this.cacheHit = cacheHit;
+        }
     }
 
-    @Override
-    public String toString() {
-      return "QueryStatistics{" + "queryTakenTime=" + queryTakenTime + ", cacheHit=" + cacheHit
-          + '}';
+    public List<Map<String, Object>> queryCache(Q baiheQuery) {
+        if(cacheService==null){
+            return null;
+
+        }
+        List<Map<String, Object>> queryResult = null;
+        String key = PRE_KEY + baiheQuery.hashCode();
+
+        String queryResultJson = cacheService.get(key);
+        if (queryResultJson == null) {
+            return null;
+        }
+        queryResult = gson.fromJson(queryResultJson, new TypeToken<ArrayList<Map<String, Object>>>() {
+        }.getType());
+        return queryResult;
+
     }
 
-  }
+    public void recordQueryLog(QueryStatistics queryStatistics) {
+        logger.info(queryStatistics.toString());
+
+    }
+
+    public static class QueryStatistics {
+
+        //seconds
+        private long queryTakenTime = 0;
+        private boolean cacheHit = false;
+
+        @Override
+        public String toString() {
+            return "QueryStatistics{" + "queryTakenTime=" + queryTakenTime + ", cacheHit=" + cacheHit + '}';
+        }
+
+        public QueryStatistics(long queryTakenTim, boolean cacheHit) {
+            this.queryTakenTime = queryTakenTim;
+            this.cacheHit = cacheHit;
+        }
+
+    }
 
 }
