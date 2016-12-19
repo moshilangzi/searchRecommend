@@ -79,6 +79,7 @@ public abstract class AbstractQueryService<Q extends AbstractQuery> extends Abst
     }
 
     public abstract List<Map<String, Object>> query(Q baiheQuery) throws Exception;
+    public abstract Map<String,Object> queryAll(Q baiheQuery) throws Exception;
 
     public void cacheQueryResult(Q baiheQuery, List<Map<String, Object>> queryResult) {
         String cacheStr = baiheQuery.getCacheStrategy();

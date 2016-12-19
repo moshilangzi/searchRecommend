@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.geo.GeoDistance;
+import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
@@ -57,17 +58,25 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         List<String> fls = query.getFls();
         List<SortItem> sortItems = query.getSortItems();
         int pageNum = query.getPageNum();
-        int pageSize = query.getPageSize();
-        if (pageNum < 1) {
-            //default first page
-            pageNum = 1;
-        } else {
-            pageNum = query.getPageNum();
+        if(pageNum>0){
+            int pageSize = query.getPageSize();
+            if (pageNum < 1) {
+                //default first page
+                pageNum = 1;
+            } else {
+                pageNum = query.getPageNum();
+            }
+
+
+
+            searchSourceBuilder.from((pageNum - 1) * pageSize).size(pageSize);
+
+        }
+        if(pageNum<0){
+            searchSourceBuilder.from((query.getOffset()) ).size(query.getLimit());
+
         }
 
-
-
-        searchSourceBuilder.from((pageNum - 1) * pageSize).size(pageSize);
         if(sortItems!=null){
             for (SortItem sortItem : sortItems) {
                 searchSourceBuilder.sort(sortItem.getFieldName(), sortItem.getSort().trim().equals("asc") ? SortOrder.ASC : SortOrder.DESC);
@@ -105,13 +114,15 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         //添加filter
 
         BoolQueryBuilder filterQuery = new BoolQueryBuilder();
+
         List<SubQuery> subQueries=subQuery.getSubQuerys();
         if(subQueries!=null){
 
             for(SubQuery query1:subQueries){
                 if(query1.getQueryItem()!=null&&query1.getQueryItem().isIsFilterType()){
+                    //makeFilterBoolQuery(query1.getQueryItem(),filterQuery);
+                    //makeFinalBoolQuery(query1,filterQuery);
                     makeBoolQuery(query1.getQueryItem(),filterQuery);
-
 
 
 
@@ -151,8 +162,12 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
             ScriptScoreFunctionBuilder scriptBuilder = ScoreFunctionBuilders.scriptFunction(script);
 
 
+
             functionScoreQueryBuilder = new FunctionScoreQueryBuilder(boolQueryBuilder);
+
             functionScoreQueryBuilder.add(scriptBuilder);
+            functionScoreQueryBuilder.boostMode(CombineFunction.SUM);
+            functionScoreQueryBuilder.scoreMode("sum");
 
 
 
@@ -245,7 +260,10 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
                     }
                     else{
                         TermQueryBuilder termQueryBuilder = new TermQueryBuilder(fieldName, matchValue);
-                        tmpBoolQueryBuilder.should(termQueryBuilder);
+                        if(queryItem.isIsFilterType()){
+                            tmpBoolQueryBuilder.must(termQueryBuilder);
+                        }
+                        else tmpBoolQueryBuilder.should(termQueryBuilder);
 
                     }
 

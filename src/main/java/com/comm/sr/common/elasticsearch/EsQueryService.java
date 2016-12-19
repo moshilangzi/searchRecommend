@@ -16,6 +16,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -114,9 +115,12 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
         EsQueryGenerator.EsQueryWrapper  esQueryWrapper=new EsQueryGenerator().generateFinalQuery(baiheQuery);
         SearchResponse searchResponse=client.prepareSearch().setSource(esQueryWrapper.getSearchSourceBuilder().toString()).setIndices(esQueryWrapper.getIndexName())
                 .execute().actionGet();
-        for (SearchHit hit : searchResponse.getHits().getHits()) {
+        SearchHits searchHits=searchResponse.getHits();
+        long totalCount=searchHits.getTotalHits();
+        for (SearchHit hit : searchHits.getHits()) {
             Map<String, Object> values = hit.getSource();
             values.put("score",hit.getScore());
+
 
 
 
@@ -131,6 +135,38 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
 
         return results;
 
+    }
+
+    @Override public Map<String, Object> queryAll(EsCommonQuery baiheQuery) throws Exception {
+        String clusteridentity=baiheQuery.getClusterIdentity();
+        TransportClient client=clientMap.get(clusteridentity);
+        Map<String, Object> finalResults=Maps.newHashMap();
+        List<Map<String, Object>> results = Lists.newArrayList();
+        EsQueryGenerator.EsQueryWrapper  esQueryWrapper=new EsQueryGenerator().generateFinalQuery(baiheQuery);
+        SearchResponse searchResponse=client.prepareSearch().setSource(esQueryWrapper.getSearchSourceBuilder().toString()).setIndices(esQueryWrapper.getIndexName())
+            .execute().actionGet();
+        SearchHits searchHits=searchResponse.getHits();
+        long totalCount=searchHits.getTotalHits();
+        for (SearchHit hit : searchHits.getHits()) {
+            Map<String, Object> values = hit.getSource();
+            values.put("score",hit.getScore());
+
+
+
+
+            results.add(values);
+
+        }
+
+        Map<String, Object> exInfo=Maps.newHashMap();
+        exInfo.put("totalCount",totalCount);
+
+
+        finalResults.put("exInfo",exInfo);
+        finalResults.put("conInfo",results);
+
+
+        return finalResults;
     }
 
 }

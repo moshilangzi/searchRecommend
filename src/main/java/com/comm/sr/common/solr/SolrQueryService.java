@@ -82,4 +82,8 @@ public class SolrQueryService extends AbstractQueryService<SolrCommonQuery> {
     return results;
   }
 
+  @Override public Map<String, Object> queryAll(SolrCommonQuery baiheQuery) throws Exception {
+    return null;
+  }
+
 }

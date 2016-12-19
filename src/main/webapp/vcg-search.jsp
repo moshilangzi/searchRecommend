@@ -23,10 +23,10 @@ and open the template in the editor.
             $('#progressBar').css('visibility', 'visible');
             inputText = $('#queryStr').val();
             //  alert(textType);
-            scoreScript = $('#scoreScript').val();
+            pageNum = $('#pageNum').val();
             fetchSize = $('#fetchSize').val();
-            newImageMeragePolicy=$('#newImageMeragePolicy').val();
-            ifUseSecondSortBasedDate=$('#ifUseSecondSortBasedDate').is(":checked");
+            newImageMeragePolicy = $('#newImageMeragePolicy').val();
+            ifUseSecondSortBasedDate = $('#ifUseSecondSortBasedDate').is(":checked");
 
             //alert(scoreScript)
 
@@ -34,16 +34,16 @@ and open the template in the editor.
             //  alert(text);
             paramsObj = new Object();
             paramsObj.queryText = inputText;
-            paramsObj.fetchSize=fetchSize;
-            paramsObj.scoreScript = scoreScript;
-            paramsObj.newImageMeragePolicy=newImageMeragePolicy;
-            paramsObj.ifUseSecondSortBasedDate=ifUseSecondSortBasedDate;
+            paramsObj.fetchSize = fetchSize;
+            paramsObj.pageNum = pageNum;
+            paramsObj.newImageMeragePolicy = newImageMeragePolicy;
+            paramsObj.ifUseSecondSortBasedDate = ifUseSecondSortBasedDate;
             paramsStr = JSON.stringify(paramsObj);
 
 
-          alert(paramsStr)
-            paramsStr= encodeURIComponent(paramsStr);
-          //  alert(paramsStr)
+            alert(paramsStr)
+            paramsStr = encodeURIComponent(paramsStr);
+            //  alert(paramsStr)
 
             $.ajax({
                 url: "http://localhost:8080/inner/srservice/search.json",
@@ -65,37 +65,42 @@ and open the template in the editor.
         }
 
         function processSearchResult(result) {
-            $('#terms_trs').empty();
+            $('#imgList').empty();
 
             code = result.code;
             if (code == 200) {
 
-                groups = result.data;
+                groups = result.data.result;
                 if (groups.length == 0) {
                     alert("结果为空!");
                 }
                 alert(result.toString)
                 alert(groups.length)
-                content=''
+                content = ''
                 for (index = 0; index < groups.length; index++) {
+
 
                     image = groups[index];
                     alert(image.url);
+                    dateStr=image.date;
 
-                        //content+="<tr><td>'"+image.resId+"'</td>"
-                        content=content+"<img src ="+image.url+">";
+
+                    content=content+"<div class='card'><div class='image'><img src='"+image.url+"'></div>";
+                    content=content+"<div class='meta'>上传日期: "+dateStr+" </div>";
+                    content=content+"<div class='meta'>id: "+image.id+" </div>";
+                    content=content+"<div class='meta'>score: "+image.score+" </div>";
+                    content=content+"<div class='meta'>resId: "+image.resId+" </div></div>";
+
                     //content+="</tr>"
 
 
-
-
-
-
-
-
-
                 }
-                $('#terms_trs').append(content)
+                $('#imgList').append(content)
+                message="<li>"+result.data.exInfo+"</li>"
+                $('#queryAnalyzerMessage').empty();
+                $('#queryAnalyzerMessage').append(message)
+
+
 
 
             }
@@ -110,65 +115,71 @@ and open the template in the editor.
 </head>
 <body>
 <h1 class="ui header centered blue">vcg搜索</h1>
+
 <div class="ui message">
     <div class="header">
-       概念定义:
+        当前查询解析：
     </div>
-    <ul class="list">
-        <li>h表示以当前时间为基准,过去多少小时上传的图片被认为最新图片</li>
-        <li>时间二次排序表示搜索过程中不对图片进行日期相关的排序,仅仅针对最终的搜索结果进行二次排序将最新图片打乱加入结果集中
-        ,打乱的方式：
-            1：简单的每页一半新图放在好图后面，2：新图和好图随机打乱
-        </li>
-        <li>如果不选择二次排序,则系统将默认利用es的score机制基于已有的payload总分加上日期相关的权重进行排序</li>
+    <ul class="list" id="queryAnalyzerMessage">
+
+
+
     </ul>
 </div>
 <div class="ui input">
 
-    <input type="text" placeholder="返回数量" id="fetchSize">
+
+    <input type="text" placeholder="每页数量" id="fetchSize">
 </div>
+<div class="ui input">
+
+    <input type="text" placeholder="页数" id="pageNum">
+</div>
+<%--<div class="ui input">--%>
+
+    <%--<input type="text" placeholder="每页新图百分比" id="newImagePercentage">--%>
+<%--</div>--%>
 <div class="ui input ">
 
     <input type="text" placeholder="请输入查询内容" id="queryStr">
 </div>
 
-<select class="ui dropdown" id="newImageMeragePolicy">
-    <option value="0">随机打乱</option>
-    <option value="1">新图在后好图在前</option>
-    <%--<option value="2">间隔交叉</option>--%>
-</select>
+<%--<select class="ui dropdown" id="newImageMeragePolicy">--%>
+    <%--<option value="0">随机打乱</option>--%>
+    <%--<option value="1">新图在后好图在前</option>--%>
+    <%--&lt;%&ndash;<option value="2">间隔交叉</option>&ndash;%&gt;--%>
+<%--</select>--%>
 
-<div class="ui  checkbox hidden">
-    <input type="checkbox" id="ifUseSecondSortBasedDate"  >
-    <label>时间二次排序</label>
-</div>
+<%--<div class="ui  checkbox hidden">--%>
+    <%--<input type="checkbox" id="ifUseSecondSortBasedDate">--%>
+    <%--<label>时间二次排序</label>--%>
+<%--</div>--%>
 
-<div class="ui massive icon input">
-    <input type="text" placeholder="scoreScript" id="scoreScript">
-</div>
+
 
 
 <button class="ui primary button" onclick="javascript:search();">查询</button>
 <div id="progressBar" class="ui active medium inline loader"></div>
-<table class="ui single small compact line table">
+
+<%--<div class="ui eight column grid" id="imgList">--%>
+    <%--&lt;%&ndash;<div class="column"><div class="ui segment"><img></div></div>&ndash;%&gt;--%>
 
 
-    <tbody id="terms_trs">
+<%--</div>--%>
+
+<div class="ui six  cards" id="imgList">
+    <%--<div class="ui card"><div class="image"><img></div>--%>
+    </div>
+<%--<table class="ui single small compact line table">--%>
 
 
+    <%--<tbody id="terms_trs">--%>
 
 
-    </tbody>
+    <%--</tbody>--%>
 
 
-</table>
-
-
-
-
-
-
-
+<%--</table>--%>
 
 
 </body>

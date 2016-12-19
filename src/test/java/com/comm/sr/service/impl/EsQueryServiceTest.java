@@ -96,7 +96,7 @@ public class EsQueryServiceTest {
         EsCommonQuery baiheQuery = new EsCommonQuery(1, 5, sortItems, fls, indexName, typeName);
         baiheQuery.setSubQuery(subQuery);
         baiheQuery.setClusterIdentity("test");
-        //baiheQuery.setScoreScript("100*_score");
+       // baiheQuery.setScoreScript("100*_score");
 
 
 

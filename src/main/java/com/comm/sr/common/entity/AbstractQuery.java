@@ -19,6 +19,9 @@ public class AbstractQuery implements Serializable {
 
     protected int pageNum = -1;
     protected int pageSize = 18;
+    protected int offset =-1;
+    protected int  limit=0;
+
     protected List<SortItem> sortItems = Lists.newArrayList();
     protected List<String> fls = Lists.newArrayList();
     protected String cacheStrategy=null;
@@ -27,6 +30,22 @@ public class AbstractQuery implements Serializable {
     public AbstractQuery(int pageNum, int pageSize) {
         this.pageNum = pageNum;
         this.pageSize = pageSize;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
     }
 
     public AbstractQuery() {

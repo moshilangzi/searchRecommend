@@ -8,16 +8,16 @@ import org.apache.solr.client.solrj.response.QueryResponse;
  */
 public class SolrCloudTest {
 
-    public static void main(String[] args) throws Exception {
-        CloudSolrServer cloudSolr=null;//= CloudSolr.getWomanInstance();
-        SolrQuery solrQuery = new SolrQuery();
-        solrQuery.setQuery("*:*");
+  public static void main(String[] args) throws Exception {
+    CloudSolrServer cloudSolr = null;// = CloudSolr.getWomanInstance();
+    SolrQuery solrQuery = new SolrQuery();
+    solrQuery.setQuery("*:*");
 
-        QueryResponse queryResponse = cloudSolr.query(solrQuery);
-        System.out.println(queryResponse.getResponse().toString());
-        int totalCount = Integer.parseInt((String) queryResponse.getResponse().get("numFound"));
-        System.out.print(totalCount);
+    QueryResponse queryResponse = cloudSolr.query(solrQuery);
+    System.out.println(queryResponse.getResponse().toString());
+    int totalCount = Integer.parseInt((String) queryResponse.getResponse().get("numFound"));
+    System.out.print(totalCount);
 
-    }
+  }
 
 }
