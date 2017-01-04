@@ -5,10 +5,14 @@
  */
 package com.comm.sr.common.elasticsearch;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-
+import com.comm.sr.common.core.QueryGenerator;
+import com.comm.sr.common.entity.EsCommonQuery;
+import com.comm.sr.common.entity.QueryItem;
+import com.comm.sr.common.entity.SortItem;
+import com.comm.sr.common.entity.SubQuery;
+import com.comm.sr.common.utils.Instances;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.geo.GeoDistance;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
@@ -25,14 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbib.elasticsearch.index.query.PayloadTermQueryBuilder;
 
-import com.comm.sr.common.core.QueryGenerator;
-import com.comm.sr.common.entity.EsCommonQuery;
-import com.comm.sr.common.entity.QueryItem;
-import com.comm.sr.common.entity.SortItem;
-import com.comm.sr.common.entity.SubQuery;
-import com.comm.sr.common.utils.Instances;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -171,6 +170,11 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
             functionScoreQueryBuilder.scoreMode("sum");
 
 
+
+        }
+        if(query.isRandomSort()){
+            functionScoreQueryBuilder = new FunctionScoreQueryBuilder(boolQueryBuilder);
+            functionScoreQueryBuilder.add(ScoreFunctionBuilders.randomFunction(100000000));
 
         }
         if(functionScoreQueryBuilder!=null){
@@ -406,6 +410,17 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         esCommonQuery.setSubQuery(finalQuery_);
 
         String query=new EsQueryGenerator().generateFinalQuery(esCommonQuery).getSearchSourceBuilder().toString();
-        System.out.print(query);
+      //  System.out.print(query);
+
+
+
+        String queryStr="{\"_source\":false,\"explain\":false,\"fields\":[\"uploadTime\",\"brandType\"],\"filter\":{\"bool\":{\"must\":[{\"range\":{\"createTime\":{\"gt\":\"20050101000000\",\"lte\":\"20161230000000\"}}},{\"bool\":{\"should\":[{\"bool\":{\"should\":[{\"term\":{\"onlineState\":\"1\"}},{\"term\":{\"onlineState\":\"2\"}}]}}]}},{\"bool\":{\"should\":[{\"term\":{\"colorType\":\"1\"}},{\"term\":{\"colorType\":\"2\"}}]}},{\"match\":{\"graphicalStyle\":{\"operator\":\"and\",\"query\":\"1\"}}}],\"must_not\":[{\"match\":{\"imageState\":{\"operator\":\"and\",\"query\":\"9\"}}}]}},\"from\":300,\"query\":{\"function_score\":{\"query\":{\"bool\":{\"must\":[{\"payload_term\":{\"prekey\":\"30357\"}},{\"payload_term\":{\"prekey\":\"32905\"}},{\"payload_term\":{\"prekey\":\"7505\"}}],\"must_not\":[]}},\"script_score\":{\"script\":\"1.0\"}}},\"size\":300}";
+        final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        //searchSourceBuilder.from(3);
+        //searchSourceBuilder.query(queryBuilder);
+        System.out.print(searchSourceBuilder.toString());
+
+
+
     }
 }

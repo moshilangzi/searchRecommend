@@ -1,2 +1,7 @@
 /target/
+/.svn
+/.idea
+
+/nbproject/
+/target/
 /nbproject/
