@@ -75,23 +75,43 @@ and open the template in the editor.
                 if (groups.length == 0) {
                     alert("结果为空!");
                 }
-                alert(result.toString)
-                alert(groups.length)
+//
                 content = ''
                 for (index = 0; index < groups.length; index++) {
 
 
                     image = groups[index];
-                    alert(image.url);
                     dateStr=image.uploadTime;
 
+                    content=content+"<div class='card'> ";
+                    content=content+"<div class='image'>"+"<img src="+image.url+">"+"</div>";
 
-                    content=content+"<div class='card'><div class='image'><img src='"+image.url+"'></div>";
+
+
+                     content=content+"<div class='content'>";
                     content=content+"<div class='meta'>上传日期: "+dateStr+" </div>";
                     content=content+"<div class='meta'>id: "+image.id+" </div>";
                     content=content+"<div class='meta'>score: "+image.score+" </div>";
-                    content=content+"<div class='meta'>imageId: "+image.id+" </div></div>";
-                    content=content+"<div class='meta'>imageStatistic: "+image.imageKwIdStatistics+" </div></div>";
+                    content=content+"<div class='meta'>imageId: "+image.id+" </div>";
+                    content=content+"<div class='meta'>brandName: "+image.brandName+" </div>";
+                    var sar =image.imageKwIdStatistics;
+                    var arr=[];
+                    arr=sar.toString().split("@")
+
+                    for(var i=0;i < arr.length;i++ ){
+                        var ss= arr[i].split(":")
+                        content=content+"<div class='meta'>关键词: "+ss[0]+" </div>";
+                        content=content+"<div class='meta'>得分: "+ss[4]+" </div>";
+                        content=content+"<div class='meta'>下载次数: "+ss[1]+" </div>";
+                        content=content+"<div class='meta'>收藏次数: "+ss[2]+" </div>";
+                        content=content+"<div class='meta'>点击次数: "+ss[3]+" </div>";
+
+
+
+                    }
+                    //显示每个图片的所有关键词的
+                    content=content+"</div></div>";
+
 
                     //content+="</tr>"
 
@@ -179,19 +199,15 @@ and open the template in the editor.
 
 <%--</div>--%>
 
-<div class="ui six  cards" id="imgList">
-    <%--<div class="ui card"><div class="image"><img></div>--%>
-    </div>
-<%--<table class="ui single small compact line table">--%>
+<div class="ui cards" id="imgList">
+    <%--<div class="card">--%>
+        <%--<div class="content">--%>
 
+            <%--<div class="meta">Friend</div>--%>
 
-    <%--<tbody id="terms_trs">--%>
+        <%--</div>--%>
+    <%--</div>--%>
 
-
-    <%--</tbody>--%>
-
-
-<%--</table>--%>
 
 
 </body>

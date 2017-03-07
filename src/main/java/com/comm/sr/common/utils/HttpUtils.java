@@ -1,12 +1,25 @@
 package com.comm.sr.common.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,16 +38,17 @@ public class HttpUtils {
 
         httpClient.getHttpConnectionManager().getParams().setMaxTotalConnections(1000);
 
-        httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
+        httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(8000);
 
-        httpClient.getHttpConnectionManager().getParams().setSoTimeout(5000);
+        httpClient.getHttpConnectionManager().getParams().setSoTimeout(8000);
 
         httpClient.getHttpConnectionManager().getParams().setTcpNoDelay(true);
 
         httpClient.getHttpConnectionManager().getParams().setLinger(1000);
 
+        HttpMethodRetryHandler retryhandler = new DefaultHttpMethodRetryHandler(0, false);
+        httpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, retryhandler);
 
-        httpClient.getHttpConnectionManager().getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler());
 
     }
 
@@ -87,9 +101,90 @@ public class HttpUtils {
         }
         return "";
     }
+    final static CloseableHttpClient httpclient = HttpClients.createDefault();
+    static {
 
+
+    }
+    public static String executeWithHttpPost(String thirdURL, Map<String, Object> params)
+     {
+         String responseStr=null;
+         HttpPost httppost=null;
+
+
+
+        try {
+             httppost= new HttpPost(thirdURL);
+            String queryData=GsonHelper.objToJson(params);
+
+            StringEntity stringEntity=new StringEntity(queryData,ContentType.APPLICATION_JSON);
+
+            // It may be more appropriate to use FileEntity class in this particular
+            // instance but we are using a more generic InputStreamEntity to demonstrate
+            // the capability to stream out data from any arbitrary source
+            //
+            // FileEntity entity = new FileEntity(file, "binary/octet-stream");
+
+            httppost.setEntity(stringEntity);
+
+            System.out.println("Executing request: " + httppost.getRequestLine());
+            CloseableHttpResponse response = httpclient.execute(httppost);
+            try {
+
+               responseStr=EntityUtils.toString(response.getEntity());
+            } finally {
+                response.close();
+            }
+        }catch (Exception e){
+
+            LOGGER.info(com.yufei.utils.ExceptionUtil.getExceptionDetailsMessage(e));
+
+        }
+
+
+
+//        PostMethod httpMethod = new PostMethod(thirdURL);
+//        NameValuePair[] nvps = convertMapToNameValuePair(params);
+//
+//        URI uri = null;
+//
+//        if (nvps !=null && (nvps.length > 0)) {
+//            //httpMethod.setRequestBody(nvps);
+//            String queryData=GsonHelper.objToJson(params);
+//            LOGGER.info("post data:"+queryData+"");
+//            //httpMethod.addParameter("data",queryData);
+//            httpMethod.setRequestEntity(new StringRequestEntity(queryData));
+//        }
+//        try {
+//            uri = httpMethod.getURI();
+//            LOGGER.debug(">>>>--{}", uri.toString());
+//
+//            int statusCode = httpClient.executeMethod(httpMethod);
+//            if (statusCode != HttpStatus.SC_OK) {
+//                LOGGER.error("执行Http Post方法出错ִ[{}]", statusCode);
+//            }
+//            InputStream stream = httpMethod.getResponseBodyAsStream();
+//
+//            BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+//            StringBuffer buf = new StringBuffer();
+//            String line;
+//            while (null != (line = br.readLine())) {
+//                buf.append(line).append("\n");
+//            }
+//            LOGGER.debug("<<<<--{}", buf.toString());
+//
+//            return buf.toString();
+//        } catch (Exception e) {
+//            LOGGER.error("异常信息：[{}]", uri != null ? uri.toString() : thirdURL, e);
+//        } finally {
+//            httpMethod.releaseConnection();
+//        }
+//        return "";
+         return responseStr;
+    }
 
     public static NameValuePair[] convertMapToNameValuePair(Map<String, Object> params) {
+        //"phrase":"sky","onlineState":1,"debug":"true"
         if (params == null) {
             return null;
         }
@@ -102,6 +197,48 @@ public class HttpUtils {
             nvps[i] = new NameValuePair(name, value.toString());
         }
         return nvps;
+    }
+    public static void main(String[] args){
+        String testUrl="http://search.vcg.csdn.net/search?_client_=creative";
+        //perpage:300
+        //page:1
+        Map<String,Object> requestParames= Maps.newHashMap();
+        requestParames.put("phrase","sky");
+        requestParames.put("onlineState","1");
+        requestParames.put("debug",true);
+        requestParames.put("perpage","100");
+        requestParames.put("page","1");
+        requestParames.put("sort","best_adv");
+        requestParames.put("fields",Lists.newArrayList("brandId","collectionId","resId","uploadTime","licenseType"));
+
+       // "fields":["collectionId","resId","uploadTime","licenseType"]
+
+        String str=HttpUtils.executeWithHttpPost(testUrl,requestParames);
+        System.out.print(str);
+        List<String> kwIds= Lists.newArrayList();
+        JSONObject topObject= JSON.parseObject(str);
+        kwIds = JsonPath.read(str, "$.debug.keywordDetail.kids");
+        List<Map<String, String>> images =  JsonPath.parse(str).read("$.datas[*]");
+
+
+        LOGGER.error(kwIds.toString());
+        LOGGER.info(images.toString());
+        LOGGER.info(images.toString());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
 

@@ -22,6 +22,7 @@ and open the template in the editor.
 
             $('#progressBar').css('visibility', 'visible');
             inputText = $('#queryStr').val();
+            serviceName = $('#serviceName').val();
             //  alert(textType);
             pageNum = $('#pageNum').val();
             fetchSize = $('#fetchSize').val();
@@ -49,7 +50,7 @@ and open the template in the editor.
                 url: "http://localhost:8080/inner/srservice/search.json",
                 dataType: "json",
                 type: "GET",
-                data: "params=" + paramsStr,
+                data: "serviceName="+serviceName+"&params=" + paramsStr,
                 success: function (data) {
                     $('#progressBar').css('visibility', 'hidden');
                     processSearchResult(data);
@@ -82,14 +83,15 @@ and open the template in the editor.
 
                     image = groups[index];
                     alert(image.url);
-                    dateStr=image.date;
+                    dateStr=image.uploadTime;
 
 
                     content=content+"<div class='card'><div class='image'><img src='"+image.url+"'></div>";
                     content=content+"<div class='meta'>上传日期: "+dateStr+" </div>";
                     content=content+"<div class='meta'>id: "+image.id+" </div>";
                     content=content+"<div class='meta'>score: "+image.score+" </div>";
-                    content=content+"<div class='meta'>resId: "+image.resId+" </div></div>";
+                    content=content+"<div class='meta'>imageId: "+image.id+" </div></div>";
+                    content=content+"<div class='meta'>imageStatistic: "+image.imageKwIdStatistics+" </div></div>";
 
                     //content+="</tr>"
 
@@ -129,7 +131,17 @@ and open the template in the editor.
 <div class="ui input">
 
 
-    <input type="text" placeholder="每页数量" id="fetchSize">
+
+    <select class="ui dropdown" id="serviceName" disabled>
+        <option value="vcgOnlineMockService">vcg线上搜索结果验证服务</option>
+
+        <option value="vcgSearchTestService">vcgSearchTestService</option>
+    </select>
+</div>
+<div class="ui input">
+
+
+    <input type="text" value="100" placeholder="每页数量" id="fetchSize" disabled>
 </div>
 <div class="ui input">
 

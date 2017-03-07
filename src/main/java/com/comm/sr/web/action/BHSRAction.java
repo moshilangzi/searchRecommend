@@ -7,8 +7,8 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.comm.sr.common.entity.ThreadShardEntity;
 import com.comm.sr.common.utils.Constants;
 import com.comm.sr.common.utils.HttpUtils;
-import com.comm.sr.service.ServiceUtils;
-import com.comm.sr.service.vcg.VcgSearchService;
+import com.comm.sr.service.SearchServiceFactory;
+import com.comm.sr.service.vcg.VcgBasedSearchService;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -106,6 +106,11 @@ public class BHSRAction {
         Object data = null;
         String parameterErrorMsg = "参数传递错误！";
         String params = request.getParameter("params");
+        String serviceName=request.getParameter("serviceName");
+        if(serviceName==null||serviceName.isEmpty()){
+            serviceName="vcgTestSearchService";
+        }
+
        //params= URLDecoder.decode(params,"UTF-8");
         //String appKey=request.getParameter("appKey");
         try {
@@ -122,8 +127,8 @@ public class BHSRAction {
                 msg = "搜索服务调用失败，请传递搜索查询内容";
             }
             else{
-                VcgSearchService vcgSearchService= ServiceUtils.getVcgSearchService();
-                data=vcgSearchService.search(params);
+                VcgBasedSearchService vcgBasedSearchService= SearchServiceFactory.vcgSearchServices.get(serviceName);
+                data=vcgBasedSearchService.search(params);
 
 
             }
