@@ -1,16 +1,5 @@
 package com.comm.sr.service.vcg;
 
-import java.util.*;
-import java.util.function.Consumer;
-
-import org.joda.time.LocalDateTime;
-import org.sql2o.Connection;
-import org.sql2o.Sql2o;
-import org.wltea.analyzer.dic.Dictionary;
-import org.wltea.analyzer.dic.IKMatchOperation;
-import org.wltea.analyzer.dic.MatchOperation;
-import org.wltea.analyzer.dic.WordsLoader;
-
 import com.comm.sr.common.component.AbstractComponent;
 import com.comm.sr.common.core.AbstractQueryService;
 import com.comm.sr.common.elasticsearch.EsQueryGenerator;
@@ -20,10 +9,19 @@ import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
 import com.comm.sr.common.utils.DateTimeUtil;
 import com.comm.sr.common.utils.GsonHelper;
-import com.comm.sr.service.ServiceUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.joda.time.LocalDateTime;
+import org.sql2o.Connection;
+import org.sql2o.Sql2o;
+import org.wltea.analyzer.dic.Dictionary;
+import org.wltea.analyzer.dic.IKMatchOperation;
+import org.wltea.analyzer.dic.MatchOperation;
+import org.wltea.analyzer.dic.WordsLoader;
+
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Created by jasstion on 07/12/2016.
@@ -365,7 +363,7 @@ public class VcgEpSearchService extends AbstractComponent{
 
     EsCommonQuery query = new EsCommonQuery(-1,1, null, Lists.newArrayList("id"), indexName, typeName);
     //doc['uploadTime'].value+_score*100000000000
-    query.setScoreScript("doc['uploadTime'].value/1000.0+_score*100000.0");
+   // query.setScoreScript("doc['uploadTime'].value/1000.0+_score*100000.0");
     query.setOffset(offsetAndLimits.getGoodImageOffset());
     query.setLimit(offsetAndLimits.getGoodImageLimit());
     query.setSubQuery(finalQuery);
@@ -738,7 +736,7 @@ public static void main(String[] args) throws Exception {
   int newImageNumPerPage=10;
   int totalNewImage=4814;
   int totalGoodImage=467694;
-  VcgEpSearchService vcgSearchService= ServiceUtils.getVcgSearchService();
+  VcgEpSearchService vcgSearchService= null;//ServiceUtils.getVcgSearchService();
   OffsetAndLimits offsetAndLimits=vcgSearchService.computeImageOffsetAndLimit(numPerPage, pageNum,
       goodImageNumPerPage, newImageNumPerPage, totalNewImage, totalGoodImage);
   System.out.print(offsetAndLimits.toString()+"\n");

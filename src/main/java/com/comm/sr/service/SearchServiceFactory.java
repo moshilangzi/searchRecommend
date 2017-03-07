@@ -13,6 +13,7 @@ import com.comm.sr.service.search.BasedSearchService;
 import com.comm.sr.service.search.EsTestSearchService;
 import com.comm.sr.service.topic.KafkaTopicService;
 import com.comm.sr.service.topic.TopicService;
+import com.comm.sr.service.vcg.VcgBasedSearchService;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -29,6 +30,7 @@ public class SearchServiceFactory {
 
 
     final public static Map<String,BasedSearchService>  srServices= Maps.newHashMap();
+    final public static Map<String,VcgBasedSearchService>  vcgSearchServices= Maps.newHashMap();
 
     static {
 
@@ -45,6 +47,10 @@ public class SearchServiceFactory {
         AbstractQueryService searchService=new EsQueryService(settings,null);
 
         srServices.put("esTest",new EsTestSearchService(searchService,searchServiceRule,settings,topicService));
+
+        vcgSearchServices.put("vcgSearchTestService",ServiceUtils.getVcgSearchService());
+        vcgSearchServices.put("vcgOnlineMockService",ServiceUtils.getVcgOnlineMockServicee());
+
     }
 
     public static void main(String[] args){
@@ -59,6 +65,8 @@ public class SearchServiceFactory {
 
 
     }
+
+
 
 
 

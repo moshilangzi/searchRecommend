@@ -8,6 +8,8 @@ import com.comm.sr.service.ruleAdmin.RuleAdminService;
 import com.comm.sr.service.topic.KafkaTopicService;
 import com.comm.sr.service.topic.TopicService;
 import com.comm.sr.service.vcg.KeywordService;
+import com.comm.sr.service.vcg.VcgBasedSearchService;
+import com.comm.sr.service.vcg.VcgOnlineMockService;
 import com.comm.sr.service.vcg.VcgSearchService;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -59,6 +61,12 @@ public class ServiceUtils {
   }
   public static VcgSearchService getVcgSearchService(){
     VcgSearchService vcgSearchService=new VcgSearchService(settings,getQueryService(),getKeywordService());
+    return vcgSearchService;
+
+
+  }
+  public static VcgBasedSearchService getVcgOnlineMockServicee(){
+    VcgOnlineMockService vcgSearchService=new VcgOnlineMockService(settings,getKeywordService(),getQueryService());
     return vcgSearchService;
 
 

@@ -1,6 +1,5 @@
 package com.comm.sr.service.vcg;
 
-import com.comm.sr.common.component.AbstractComponent;
 import com.comm.sr.common.core.AbstractQueryService;
 import com.comm.sr.common.elasticsearch.EsQueryGenerator;
 import com.comm.sr.common.entity.EsCommonQuery;
@@ -27,7 +26,7 @@ import java.util.function.Consumer;
 /**
  * Created by jasstion on 07/12/2016.
  */
-public class VcgSearchService extends AbstractComponent{
+public class VcgSearchService extends VcgBasedSearchService{
   static{
     try {
       Class.forName("com.mysql.jdbc.Driver");
@@ -363,7 +362,7 @@ public class VcgSearchService extends AbstractComponent{
 
     EsCommonQuery query = new EsCommonQuery(-1,1, null, Lists.newArrayList("id"), indexName, typeName);
     //doc['uploadTime'].value+_score*100000000000
-    query.setScoreScript("doc['uploadTime'].value/1000.0+_score*100000.0");
+    //query.setScoreScript("doc['uploadTime'].value/1000.0+_score*100000.0");
     query.setOffset(offsetAndLimits.getGoodImageOffset());
     query.setLimit(offsetAndLimits.getGoodImageLimit());
     query.setSubQuery(finalQuery);
