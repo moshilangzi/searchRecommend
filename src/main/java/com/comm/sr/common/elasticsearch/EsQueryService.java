@@ -119,7 +119,12 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
         long totalCount=searchHits.getTotalHits();
         for (SearchHit hit : searchHits.getHits()) {
             Map<String, Object> values = hit.getSource();
-            values.put("score",hit.getScore());
+            float score=hit.getScore();
+
+            if(score>0f){
+                values.put("score",score);
+            }
+
 
 
 

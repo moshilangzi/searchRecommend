@@ -7,10 +7,7 @@ import com.comm.sr.service.cache.RedisCacheService;
 import com.comm.sr.service.ruleAdmin.RuleAdminService;
 import com.comm.sr.service.topic.KafkaTopicService;
 import com.comm.sr.service.topic.TopicService;
-import com.comm.sr.service.vcg.KeywordService;
-import com.comm.sr.service.vcg.VcgBasedSearchService;
-import com.comm.sr.service.vcg.VcgOnlineMockService;
-import com.comm.sr.service.vcg.VcgSearchService;
+import com.comm.sr.service.vcg.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
@@ -67,6 +64,12 @@ public class ServiceUtils {
   }
   public static VcgBasedSearchService getVcgOnlineMockServicee(){
     VcgOnlineMockService vcgSearchService=new VcgOnlineMockService(settings,getKeywordService(),getQueryService());
+    return vcgSearchService;
+
+
+  }
+  public static VcgImageSearchService getVcgImageSearchService(){
+    VcgImageSearchService vcgSearchService=new VcgImageSearchService(settings,getQueryService());
     return vcgSearchService;
 
 

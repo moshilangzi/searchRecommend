@@ -12,7 +12,6 @@ import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
 import com.comm.sr.common.utils.Instances;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.geo.GeoDistance;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
@@ -151,23 +150,36 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         }
         //deal with score script
         FunctionScoreQueryBuilder functionScoreQueryBuilder=null;
-        if(!StringUtils.isEmpty(query.getScoreScript())){
+        if(!StringUtils.isEmpty(query.getScoreScript())||!StringUtils.isEmpty(query.getScript())){
 
            // String inlineScript = "((_score+1)*1.0 + 2.0/((1.469097882-(doc['uploadTime'].value as double)/1000000000)*17000+1.0))/_score";
             String inlineScript=query.getScoreScript();
-            Map<String, Object> params = Maps.newHashMap();
+            Map<String, Object> params = query.getScriptParams();
+            String scriptLangtype=query.getScriptLangType();
+            if(scriptLangtype==null){
+                scriptLangtype=ScriptService.DEFAULT_LANG;
+
+            }
+            String script=query.getScript();
+            if(script==null){
+                script=inlineScript;
+            }
 
 
-            Script script = new Script(inlineScript, ScriptService.ScriptType.INLINE, ScriptService.DEFAULT_LANG, params);
-            ScriptScoreFunctionBuilder scriptBuilder = ScoreFunctionBuilders.scriptFunction(script);
+            Script script_ = new Script(script, ScriptService.ScriptType.INLINE, scriptLangtype, params);
+
+            ScriptScoreFunctionBuilder scriptBuilder = ScoreFunctionBuilders.scriptFunction(script_);
+
+
+
 
 
 
             functionScoreQueryBuilder = new FunctionScoreQueryBuilder(boolQueryBuilder);
 
             functionScoreQueryBuilder.add(scriptBuilder);
-            functionScoreQueryBuilder.boostMode(CombineFunction.SUM);
-            functionScoreQueryBuilder.scoreMode("sum");
+            functionScoreQueryBuilder.boostMode(CombineFunction.REPLACE);
+            //functionScoreQueryBuilder.scoreMode("sum");
 
 
 

@@ -30,14 +30,15 @@ public class VcgSearchService extends VcgBasedSearchService{
   static{
     try {
       Class.forName("com.mysql.jdbc.Driver");
-    } catch (ClassNotFoundException e) {
+      WordsLoader wordsLoader = new KeywordLoader();
+      MatchOperation matchOperation = new IKMatchOperation();
+
+      Dictionary dictionary = new Dictionary(wordsLoader, matchOperation);
+      Dictionary.setDictionary(dictionary);
+    } catch (Exception e) {
       e.printStackTrace();
     }
-    WordsLoader wordsLoader = new KeywordLoader();
-    MatchOperation matchOperation = new IKMatchOperation();
 
-    Dictionary dictionary = new Dictionary(wordsLoader, matchOperation);
-    Dictionary.setDictionary(dictionary);
   }
   protected AbstractQueryService queryService=null;
   protected KeywordService keywordService=null;

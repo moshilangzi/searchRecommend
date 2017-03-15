@@ -99,10 +99,13 @@ public class CommonQuery extends AbstractQuery {
         hash = 37 * hash + (this.fls != null ? this.fls.hashCode() : 0);
         hash = 37 * hash + (this.queryStr != null ? this.queryStr.hashCode() : 0);
         StringBuffer sb = new StringBuffer();
-        for (SortItem sortItem : sortItems) {
-            sb.append(sortItem.fieldName);
-            sb.append(sortItem.sort);
+        if(sortItems!=null){
+            for (SortItem sortItem : sortItems) {
+                sb.append(sortItem.fieldName);
+                sb.append(sortItem.sort);
+            }
         }
+
         hash = 37 * hash + sb.toString().hashCode();
         return hash;
     }

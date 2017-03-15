@@ -5,7 +5,10 @@
  */
 package com.comm.sr.common.entity;
 
+import com.google.common.collect.Maps;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -24,6 +27,10 @@ public class EsCommonQuery extends CommonQuery {
 
     /* elasticsearch script score string */
     private String scoreScript=null;
+    private String scriptLangType=null;
+    private String script=null;
+
+    private Map<String,Object> scriptParams=Maps.newHashMap();
 
     public String getScoreScript() {
         return scoreScript;
@@ -58,6 +65,30 @@ public class EsCommonQuery extends CommonQuery {
         this.index = index;
         this.type = type;
 
+    }
+
+    public String getScriptLangType() {
+        return scriptLangType;
+    }
+
+    public void setScriptLangType(String scriptLangType) {
+        this.scriptLangType = scriptLangType;
+    }
+
+    public Map<String, Object> getScriptParams() {
+        return scriptParams;
+    }
+
+    public void setScriptParams(Map<String, Object> scriptParams) {
+        this.scriptParams = scriptParams;
+    }
+
+    public String getScript() {
+        return script;
+    }
+
+    public void setScript(String script) {
+        this.script = script;
     }
 
     @Override

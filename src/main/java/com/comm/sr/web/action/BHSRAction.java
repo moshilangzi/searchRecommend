@@ -8,7 +8,9 @@ import com.comm.sr.common.entity.ThreadShardEntity;
 import com.comm.sr.common.utils.Constants;
 import com.comm.sr.common.utils.HttpUtils;
 import com.comm.sr.service.SearchServiceFactory;
+import com.comm.sr.service.ServiceUtils;
 import com.comm.sr.service.vcg.VcgBasedSearchService;
+import com.comm.sr.service.vcg.VcgImageSearchService;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -141,7 +143,42 @@ public class BHSRAction {
         Constants.threadShardEntity.remove();
     }
 
+    @RequestMapping(value = "/imageSearch")
+    public void listImage(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        UUID uuid = UUID.randomUUID();
+        //每次服务请求对应的唯一id
+        String uuidStr = uuid.toString();
+        ThreadShardEntity threadShardEntity_=new ThreadShardEntity(uuidStr);
+        Constants.threadShardEntity.set(threadShardEntity_);
 
+        int code = 200;
+        String msg = "正常调用";
+        Object data = null;
+        String parameterErrorMsg = "参数传递错误！";
+        String params = request.getParameter("params");
+
+
+
+        try {
+
+            if (StringUtils.isEmpty(params)) {
+                code=-100;
+                msg = "搜索服务调用失败，请传递搜索查询内容";
+            }
+            else{
+                VcgImageSearchService vcgBasedSearchService= ServiceUtils.getVcgImageSearchService();
+                data=vcgBasedSearchService.search(params);
+
+
+            }
+        } catch (Exception e) {
+            code = -100;
+            msg = e.getMessage();
+            LOGGER.info("搜索服务调用失败，具体异常信息是：" + msg + "");
+        }
+        printJsonTemplate(code, msg, data, request, response);
+        Constants.threadShardEntity.remove();
+    }
 
 
     private void printJsonTemplate(int code, String msg, Object data,

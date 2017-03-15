@@ -26,6 +26,7 @@ import org.sql2o.Sql2o;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -281,20 +282,21 @@ public class VcgOnlineMockService extends VcgBasedSearchService {
     StringBuffer clause=new StringBuffer();
     clause.append("(").append(org.apache.commons.lang3.StringUtils.join(imageIds,",")).append(")");
 
-    String sql="select oss_id2,id from resource where id in "+clause.toString();
+    String sql="select oss_id5,id from resource where id in "+clause.toString();
     logger.debug(sql);
     List<Map<String, Object>>  re=con.createQuery(sql).executeAndFetchTable().asList();
     for (Map<String, Object> map:re){
       try {
-        if (!map.containsKey("oss_id2") || !map.containsKey("id")) {
+        if (!map.containsKey("oss_id5") || !map.containsKey("id")) {
           continue;
         }
-        results.put(map.get("id").toString(), map.get("oss_id2").toString());
+        results.put(map.get("id").toString(), map.get("oss_id5").toString());
       }catch (Exception e){
         logger.info(ExceptionUtil.getExceptionDetailsMessage(e));
         logger.debug(map.toString());
       }
     }
+    con.close();
 
 
 
@@ -454,23 +456,23 @@ private List<String> getImageStatistics(String imageId,List<String> kwIds){
 //    query.setClusterIdentity("vcgstatistics");
 //    EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(query);
 //
-//   System.out.print(esQueryWrapper.getSearchSourceBuilder().toString() + "\n");
+//   System.out.print(esQueryWrapperSearchSourceBuilder().toString() + "\n");
 //
 //      List<Map<String, Object>> result=queryService.query(query);
 
 
-    String serviceName="vcgOnlineMockService";
-    VcgBasedSearchService vcgBasedSearchService= SearchServiceFactory.vcgSearchServices.get(serviceName);
-    SearchParams searchParams=new SearchParams();
-    searchParams.setFetchSize(100);
-    searchParams.setPageNum(2);
-    searchParams.setQueryText("男人");
-    String searchParamsStr=GsonHelper.objToJson(searchParams);
-
-
-    Map<String,Object> map=vcgBasedSearchService.search("{\"serviceName\":\"vcgOnlineMockService\",\"queryText\":\"girl sea\",\"fetchSize\":\"100\",\"pageNum\":\"1\",\"ifUseSecondSortBasedDate\":false}");
-    System.out.print(map.get("exInfo")+"\n");
-    System.out.print(map.get("result")+"\n");
+//    String serviceName="vcgOnlineMockService";
+//    VcgBasedSearchService vcgBasedSearchService= SearchServiceFactory.vcgSearchServices.get(serviceName);
+//    SearchParams searchParams=new SearchParams();
+//    searchParams.setFetchSize(100);
+//    searchParams.setPageNum(2);
+//    searchParams.setQueryText("男人");
+//    String searchParamsStr=GsonHelper.objToJson(searchParams);
+//
+//
+//    Map<String,Object> map=vcgBasedSearchService.search("{\"serviceName\":\"vcgOnlineMockService\",\"queryText\":\"girl sea\",\"fetchSize\":\"100\",\"pageNum\":\"1\",\"ifUseSecondSortBasedDate\":false}");
+//    System.out.print(map.get("exInfo")+"\n");
+//    System.out.print(map.get("result")+"\n");
 
 
    //populate brandIdMap, brandTypeMap
@@ -537,6 +539,78 @@ private List<String> getImageStatistics(String imageId,List<String> kwIds){
 //    System.out.print(brandTypeMap.get("10181")+"\n");
 //    //gi
 //    System.out.print(brandTypeMap.get("10572")+"\n");
+
+
+
+//    final ExecutorService executorService =
+//        new ThreadPoolExecutor(10, 10, 30, TimeUnit.SECONDS,
+//            new ArrayBlockingQueue<Runnable>(1), new ThreadPoolExecutor.CallerRunsPolicy());
+//
+//
+//
+//        String serviceName="vcgOnlineMockService";
+//      final  VcgOnlineMockService vcgBasedSearchService=
+//            (VcgOnlineMockService) SearchServiceFactory.vcgSearchServices.get(serviceName);
+//        List<String> ids= FileUtil.readLines("/data/vcg/ids_all_newab");
+//        List<List<String>> idss=CommonUtil.splitCollection(ids,10000);
+//
+//    for (List<String> tmp : idss) {
+//      executorService.submit(new Runnable() {
+//        @Override public void run() {
+//
+//          try {
+//            vcgBasedSearchService.getImageUrlInfo(tmp).forEach(new BiConsumer<String, String>() {
+//              @Override public void accept(String s, String s2) {
+//                String imageUrl = vcgBasedSearchService.imageDomain + s2;
+//                try {
+//                  URL url = new URL(imageUrl);
+//                  FileUtils
+//                      .copyURLToFile(url, new File("/data/mlib_data/images/vcg_creative/" + s + ".jpg"));
+//                  //
+//                  //            InputStream is = url.openStream();
+//                  //            FileOutputStream os = new FileOutputStream("/data/mlib_data/images/vcg_creative/"+s+".jpg");
+//                  //
+//                  //            byte[] b = new byte[2048];
+//                  //            int length;
+//                  //
+//                  //            while ((length = is.read(b)) != -1) {
+//                  //              os.write(b, 0, length);
+//                  //            }
+//                  //
+//                  //            is.close();
+//                  //            os.close();
+//                } catch (IOException e) {
+//                  System.out.print(e.getMessage());
+//                }
+//
+//              }
+//            });
+//          } catch (Exception e) {
+//            e.printStackTrace();
+//          }
+//
+//        }
+//      });
+//
+//
+//
+//
+//
+//
+//    }
+    String imageDomain="http://bj-feiyuantu.oss-cn-beijing.aliyuncs.com/";
+
+    List<String> imageIds=Lists.newArrayList("200205080,201454132,200986697,202061007,201387604,200222965,201038461,200796559".split(","));
+    String serviceName="vcgOnlineMockService";
+    final  VcgOnlineMockService vcgBasedSearchService=
+                (VcgOnlineMockService) SearchServiceFactory.vcgSearchServices.get(serviceName);
+    vcgBasedSearchService.getImageUrlInfo(imageIds).forEach(new BiConsumer<String, String>() {
+      @Override public void accept(String s, String s2) {
+        System.out.print(s+";"+imageDomain+s2+"\n");
+
+      }
+    });
+
 
 
 

@@ -88,7 +88,7 @@ public abstract class AbstractQueryService<Q extends AbstractQuery> extends Abst
             return;
         }
         ifUseCache.set(Boolean.TRUE);
-        String queryResultJson = gson.toJson(queryResult);
+        String queryResultJson = null;
         if(cacheService==null){
             return;
         }
@@ -96,6 +96,7 @@ public abstract class AbstractQueryService<Q extends AbstractQuery> extends Abst
             //default not to set cache
             // valueOperations.set(key, queryResultJson);
         } else {
+          queryResultJson=gson.toJson(queryResult);
             cacheService.set(key, queryResultJson, Integer.parseInt(cacheStr), TimeUnit.SECONDS);
 
         }

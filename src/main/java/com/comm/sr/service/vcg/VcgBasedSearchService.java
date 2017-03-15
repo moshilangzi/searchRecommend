@@ -141,4 +141,7 @@ public abstract  class VcgBasedSearchService extends AbstractComponent {
       return result;
     }
   }
+
+
+
 }
