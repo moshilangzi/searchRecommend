@@ -30,6 +30,7 @@ public class ServiceUtils {
     }
   }
 
+
   public static CacheService<String,String> getCacheService(){
     CacheService<String,String> cacheService=new RedisCacheService(settings);
     return cacheService;
@@ -37,6 +38,13 @@ public class ServiceUtils {
   }
   public static TopicService getTopicService(){
     TopicService topicService=new KafkaTopicService(settings);
+    return topicService;
+  }
+  public static TopicService getByteTopicService(){
+    Properties properties=(Properties)settings.clone();
+    properties.remove("serializer.class");
+
+    TopicService topicService=new KafkaTopicService(properties);
     return topicService;
   }
   public static RuleAdminService getRuleAdminService(){

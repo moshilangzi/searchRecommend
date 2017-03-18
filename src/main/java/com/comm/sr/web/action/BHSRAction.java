@@ -6,18 +6,25 @@ import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.comm.sr.common.entity.ThreadShardEntity;
 import com.comm.sr.common.utils.Constants;
+import com.comm.sr.common.utils.GsonHelper;
 import com.comm.sr.common.utils.HttpUtils;
 import com.comm.sr.service.SearchServiceFactory;
 import com.comm.sr.service.ServiceUtils;
+import com.comm.sr.service.cache.CacheService;
+import com.comm.sr.service.topic.TopicService;
 import com.comm.sr.service.vcg.VcgBasedSearchService;
 import com.comm.sr.service.vcg.VcgImageSearchService;
 import com.google.common.collect.Maps;
+import com.yufei.utils.ExceptionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -180,7 +187,63 @@ public class BHSRAction {
         Constants.threadShardEntity.remove();
     }
 
+    /**
+     * Upload single file using Spring Controller
+     */
 
+    @RequestMapping(value = "/imageUploadAndSearch", method = RequestMethod.POST)
+    public void imageUploadAndSearch(@RequestParam("distanceType") String distanceType, @RequestParam("file") MultipartFile file, HttpServletRequest request,HttpServletResponse response)
+        throws IOException {
+                //send image bytes to kafka also generate imageId, later get image features from redis by imageId,then search most similirity images from elastic
+        UUID uuid = UUID.randomUUID();
+        //每次服务请求对应的唯一id
+        String uuidStr = uuid.toString();
+        ThreadShardEntity threadShardEntity_=new ThreadShardEntity(uuidStr);
+        Constants.threadShardEntity.set(threadShardEntity_);
+        int code = 200;
+        String msg = "正常调用";
+                byte[] imageBytes=file.getBytes();
+        Object data = null;
+        try {
+            String imageId = UUID.randomUUID().toString();
+            TopicService topicBytesService = ServiceUtils.getByteTopicService();
+            topicBytesService.publishTopicMessage("image_upload", imageId.getBytes(), imageBytes);
+            Thread.currentThread().sleep(3*1000);
+            CacheService<String, String> redisCacheService = ServiceUtils.getCacheService();
+            String features = redisCacheService.get(imageId);
+            if(features==null){
+                throw new  RuntimeException("system error! detail message: image_upload topic not consumed correctly!");
+
+            }
+            LOGGER.debug("search images based on features:" + features + ",using distanceType:"+distanceType+"");
+
+            VcgImageSearchService.ImageSearchParams imageSearchParams = new VcgImageSearchService.ImageSearchParams();
+            imageSearchParams.setcNNFeatures(features);
+
+            if(distanceType==null){
+                distanceType="chi2";
+            }
+            imageSearchParams.setDistanceType(distanceType);
+            imageSearchParams.setMatchedTopNum(10);
+            String params = GsonHelper.objToJson(imageSearchParams);
+
+            VcgImageSearchService vcgBasedSearchService = ServiceUtils.getVcgImageSearchService();
+            data = vcgBasedSearchService.search(params);
+        }catch (Exception e){
+            code=-100;
+            msg= ExceptionUtil.getExceptionDetailsMessage(e);
+
+
+        }
+        printJsonTemplate(code, msg, data, request, response);
+        Constants.threadShardEntity.remove();
+
+
+
+
+
+
+            }
     private void printJsonTemplate(int code, String msg, Object data,
             HttpServletRequest request, HttpServletResponse response) throws IOException {
         Map<String, Object> result = new HashMap<String, Object>();

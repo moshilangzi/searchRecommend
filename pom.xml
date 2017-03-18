@@ -407,6 +407,12 @@
             <version>3.2.2</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.kafka</groupId>-->
+            <!--<artifactId>kafka-clients</artifactId>-->
+            <!--<version${kafka.version}</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -418,6 +424,11 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3.2</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.github.spullara.mustache.java/compiler -->
         <dependency>

@@ -93,6 +93,8 @@ public static class ImageSearchParams {
     this.matchedTopNum = matchedTopNum;
   }
 }
+   //imageId 不为空，vcg image图片搜索， imageId为空，cNNFeatures不为空，外部图片搜索，
+
    public Map<String, Object> search(String searchParamsStr) throws Exception {
      Map<String,Object> finalResults= Maps.newHashMap();
 
@@ -100,7 +102,7 @@ public static class ImageSearchParams {
         .jsonToObj(searchParamsStr, ImageSearchParams.class);
      EsCommonQuery query=null;
 
-     if(searchParams.getImageId()==null){
+     if(searchParams.getImageId()==null&&searchParams.getcNNFeatures()==null){
        //list images
        int pageNumber=searchParams.getPageNum();
        int pageSize=searchParams.getFetchSize();
@@ -110,22 +112,45 @@ public static class ImageSearchParams {
        query.setClusterIdentity("vcgImage");
      }
      else{
-       int pageNumber=1;
-       int pageSize=searchParams.getMatchedTopNum();
-       String indexName="vcg_image";
-       String typeName="image";
-       query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("_score","asc")), Lists.newArrayList("imageId"), indexName, typeName);
-       query.setClusterIdentity("vcgImage");
-       Map<String,Object> scriptParams= Maps.newHashMap();
-       String cNNFeatures=null;
-       //get cNNFeatures from index by imageId
-      cNNFeatures=getCNNFeaturesByImageId(searchParams.getImageId());
-       scriptParams.put("vecStr",cNNFeatures);
-       scriptParams.put("vecStrFieldName","cNNFeatures");
-       scriptParams.put("distanceType",searchParams.getDistanceType());
-       query.setScriptLangType("native");
-       query.setScriptParams(scriptParams);
-       query.setScript("vectors_distance");
+       if(searchParams.getImageId()!=null){
+         int pageNumber=1;
+         int pageSize=searchParams.getMatchedTopNum();
+         String indexName="vcg_image";
+         String typeName="image";
+         query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("_score","asc")), Lists.newArrayList("imageId"), indexName, typeName);
+         query.setClusterIdentity("vcgImage");
+         Map<String,Object> scriptParams= Maps.newHashMap();
+         String cNNFeatures=null;
+         //get cNNFeatures from index by imageId
+         cNNFeatures=getCNNFeaturesByImageId(searchParams.getImageId());
+         scriptParams.put("vecStr",cNNFeatures);
+         scriptParams.put("vecStrFieldName","cNNFeatures");
+         scriptParams.put("distanceType",searchParams.getDistanceType());
+         query.setScriptLangType("native");
+         query.setScriptParams(scriptParams);
+         query.setScript("vectors_distance");
+
+       }
+       if(searchParams.getcNNFeatures()!=null){
+         int pageNumber=1;
+         int pageSize=searchParams.getMatchedTopNum();
+         String indexName="vcg_image";
+         String typeName="image";
+         query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("_score","asc")), Lists.newArrayList("imageId"), indexName, typeName);
+         query.setClusterIdentity("vcgImage");
+         Map<String,Object> scriptParams= Maps.newHashMap();
+         String cNNFeatures=searchParams.getcNNFeatures();
+         //get cNNFeatures from index by imageId
+
+         scriptParams.put("vecStr",cNNFeatures);
+         scriptParams.put("vecStrFieldName","cNNFeatures");
+         scriptParams.put("distanceType",searchParams.getDistanceType());
+         query.setScriptLangType("native");
+         query.setScriptParams(scriptParams);
+         query.setScript("vectors_distance");
+
+       }
+
      }
 
      //EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(query);
