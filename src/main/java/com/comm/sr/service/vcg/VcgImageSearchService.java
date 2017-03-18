@@ -167,7 +167,7 @@ public static class ImageSearchParams {
 
      results.forEach(new Consumer<Map<String, Object>>() {
        @Override public void accept(Map<String, Object> stringObjectMap) {
-         stringObjectMap.put("url",imageDomain+idUrlMap.get(stringObjectMap.get("imageId")));
+         stringObjectMap.put("url",idUrlMap.get(stringObjectMap.get("imageId")));
        }
      });
 
@@ -196,9 +196,25 @@ public static class ImageSearchParams {
 
     return cNNFeatures;
   }
-  final  String imageDomain="http://bj-feiyuantu.oss-cn-beijing.aliyuncs.com/";
   public  Map<String,String> getImageUrlInfo(List<String> imageIds) throws Exception{
+    String imageStore=settings.getProperty("image.store");
     Map<String,String> results=Maps.newHashMap();
+
+
+
+    if(imageStore.equalsIgnoreCase("aws")){
+      String awsImagePrefix=settings.getProperty("image.aws.url.prefix");
+      for (String imageId : imageIds) {
+          results.put(imageId,awsImagePrefix+imageId+".jpg");
+      }
+
+      return results;
+
+    }
+
+    String ossImagePrefix=settings.getProperty("image.oss.url.prefix");
+
+
     String mysqlUrl=settings.getProperty("mysqlUrl");
     String mysqlUserName=settings.getProperty("mysqlUserName");
     String mysqlPasswd=settings.getProperty("mysqlPasswd");
@@ -220,7 +236,7 @@ public static class ImageSearchParams {
         if (!map.containsKey("oss_id5") || !map.containsKey("id")) {
           continue;
         }
-        results.put(map.get("id").toString(), map.get("oss_id5").toString());
+        results.put(map.get("id").toString(), ossImagePrefix+map.get("oss_id5").toString());
       }catch (Exception e){
         logger.info(ExceptionUtil.getExceptionDetailsMessage(e));
         logger.debug(map.toString());
