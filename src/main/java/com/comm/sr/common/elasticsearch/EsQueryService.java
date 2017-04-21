@@ -35,7 +35,10 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
 
 
 
+   public TransportClient getEsClient(String clusterIndentity){
+       return clientMap.get(clusterIndentity);
 
+   }
 
 
     public EsQueryService(Properties settings,CacheService<String,String> cacheService) {

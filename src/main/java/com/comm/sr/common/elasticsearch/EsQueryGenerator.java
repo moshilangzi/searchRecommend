@@ -189,6 +189,7 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
 
 
         }
+
         else{
             searchSourceBuilder.query(boolQueryBuilder);
 

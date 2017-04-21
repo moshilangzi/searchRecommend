@@ -180,19 +180,56 @@ public class BHSRAction {
             }
         } catch (Exception e) {
             code = -100;
-            msg = e.getMessage();
+            msg = ExceptionUtil.getExceptionDetailsMessage(e);
             LOGGER.info("搜索服务调用失败，具体异常信息是：" + msg + "");
         }
         printJsonTemplate(code, msg, data, request, response);
         Constants.threadShardEntity.remove();
     }
+    @RequestMapping(value = "/matchImageBasedImageUrl", method = RequestMethod.GET)
+    public void imageUploadAndSearch(@RequestParam(name="topNum",required = false,defaultValue = "10") String topNum,@RequestParam(name = "fields",required = false, defaultValue = "url") String fields,@RequestParam("distanceType") String distanceType, @RequestParam("imageUrl") String imageUrl, HttpServletRequest request,HttpServletResponse response)
+            throws IOException {
+        //send image bytes to kafka also generate imageId, later get image features from redis by imageId,then search most similirity images from elastic
+        UUID uuid = UUID.randomUUID();
+        //每次服务请求对应的唯一id
+        String uuidStr = uuid.toString();
+        ThreadShardEntity threadShardEntity_=new ThreadShardEntity(uuidStr);
+        Constants.threadShardEntity.set(threadShardEntity_);
+        int code = 200;
+        String msg = "正常调用";
+        Object data = null;
+        try {
+            VcgImageSearchService.ImageSearchParams imageSearchParams=new VcgImageSearchService.ImageSearchParams();
+            imageSearchParams.setDistanceType(distanceType);
+            imageSearchParams.setFields(fields);
+            imageSearchParams.setMatchedTopNum(Integer.parseInt(topNum));
+            imageSearchParams.setMatchPictureUrl(imageUrl);
 
+            String params = GsonHelper.objToJson(imageSearchParams);
+
+            VcgImageSearchService vcgBasedSearchService = ServiceUtils.getVcgImageSearchService();
+            data = vcgBasedSearchService.search(params);
+        }catch (Exception e){
+            code=-100;
+            msg= ExceptionUtil.getExceptionDetailsMessage(e);
+
+
+        }
+        printJsonTemplate(code, msg, data, request, response);
+        Constants.threadShardEntity.remove();
+
+
+
+
+
+
+    }
     /**
      * Upload single file using Spring Controller
      */
 
     @RequestMapping(value = "/imageUploadAndSearch", method = RequestMethod.POST)
-    public void imageUploadAndSearch(@RequestParam("distanceType") String distanceType, @RequestParam("file") MultipartFile file, HttpServletRequest request,HttpServletResponse response)
+    public void imageUploadAndSearch(@RequestParam(name="topNum",required = false,defaultValue = "10") String topNum,@RequestParam(name = "fields",required = false, defaultValue = "url") String fields,@RequestParam("distanceType") String distanceType, @RequestParam("file") MultipartFile file, HttpServletRequest request,HttpServletResponse response)
         throws IOException {
                 //send image bytes to kafka also generate imageId, later get image features from redis by imageId,then search most similirity images from elastic
         UUID uuid = UUID.randomUUID();
@@ -207,7 +244,7 @@ public class BHSRAction {
         try {
             String imageId = UUID.randomUUID().toString();
             TopicService topicBytesService = ServiceUtils.getByteTopicService();
-            topicBytesService.publishTopicMessage("image_upload", imageId.getBytes(), imageBytes);
+            topicBytesService.publishTopicMessage("uploadedImageForSearch", imageId.getBytes(), imageBytes);
             Thread.currentThread().sleep(3*1000);
             CacheService<String, String> redisCacheService = ServiceUtils.getCacheService();
             String features = redisCacheService.get(imageId);
@@ -224,7 +261,9 @@ public class BHSRAction {
                 distanceType="chi2";
             }
             imageSearchParams.setDistanceType(distanceType);
-            imageSearchParams.setMatchedTopNum(10);
+            imageSearchParams.setFields(fields);
+            imageSearchParams.setMatchedTopNum(Integer.parseInt(topNum));
+
             String params = GsonHelper.objToJson(imageSearchParams);
 
             VcgImageSearchService vcgBasedSearchService = ServiceUtils.getVcgImageSearchService();

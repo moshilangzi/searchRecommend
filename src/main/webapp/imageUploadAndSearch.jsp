@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+
 <html>
 
 
@@ -81,9 +83,8 @@
             }
 
             function imageUploadAndSearch(){
-                alert("test")
                 distanceType=$('#distanceMeasureName').val();
-                $('#fileId').simpleUpload("http://localhost:8080/inner/srservice/imageUploadAndSearch.json?distanceType="+distanceType, {
+                $('#fileId').simpleUpload("<spring:eval expression="@srProperties.getProperty('srserviceUrlPrefix')" />"+"inner/srservice/imageUploadAndSearch.json?distanceType="+distanceType, {
 
 //                        start: function(file){
 //                            //upload started
@@ -101,7 +102,7 @@
                     success: function(data){
                         //upload successful
                         //$('#progress').html("Success!<br>Data: " + JSON.stringify(data));
-                        alert("success")
+                       //alert("success")
                         showSimi(data)
                         $('.ui.modal')
                                 .modal('show')

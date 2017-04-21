@@ -30,9 +30,11 @@ public class ServiceUtils {
     }
   }
 
-
+  protected static CacheService<String,String> cacheService=null;
   public static CacheService<String,String> getCacheService(){
-    CacheService<String,String> cacheService=new RedisCacheService(settings);
+    if(cacheService==null){
+      cacheService=new RedisCacheService(settings);
+    }
     return cacheService;
 
   }
@@ -40,20 +42,28 @@ public class ServiceUtils {
     TopicService topicService=new KafkaTopicService(settings);
     return topicService;
   }
+  protected static TopicService byteTopicService=null;
   public static TopicService getByteTopicService(){
     Properties properties=(Properties)settings.clone();
     properties.remove("serializer.class");
+    if(byteTopicService==null){
 
-    TopicService topicService=new KafkaTopicService(properties);
-    return topicService;
+      byteTopicService=new KafkaTopicService(properties);
+    }
+
+    return byteTopicService;
   }
   public static RuleAdminService getRuleAdminService(){
     RuleAdminService ruleAdminService=new RuleAdminService(settings,ServiceUtils.getCacheService());
     return ruleAdminService;
   }
-
+  static AbstractQueryService searchService=null;
   public static AbstractQueryService getQueryService(){
-    AbstractQueryService searchService=new EsQueryService(settings,null);
+    if(searchService==null){
+      searchService=new EsQueryService(settings,null);
+    }
+
+
     return searchService;
 
 
@@ -76,8 +86,13 @@ public class ServiceUtils {
 
 
   }
+  protected static VcgImageSearchService vcgSearchService=null;
   public static VcgImageSearchService getVcgImageSearchService(){
-    VcgImageSearchService vcgSearchService=new VcgImageSearchService(settings,getQueryService());
+    if(vcgSearchService==null){
+      vcgSearchService=new VcgImageSearchService(settings,getQueryService(),getCacheService(),getByteTopicService());
+
+    }
+
     return vcgSearchService;
 
 

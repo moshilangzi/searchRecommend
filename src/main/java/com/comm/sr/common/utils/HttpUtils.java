@@ -101,6 +101,34 @@ public class HttpUtils {
         }
         return "";
     }
+
+    public static byte[] executeWithHttpImageUrl(String thirdURL, Map<String, Object> params)  {
+        byte[] result=null;
+        HttpMethod httpMethod = new GetMethod(thirdURL);
+        URI uri = null;
+        NameValuePair[] nvps = convertMapToNameValuePair(params);
+        if (nvps !=null && (nvps.length > 0)) {
+            httpMethod.setQueryString(nvps);
+        }
+        try {
+            uri = httpMethod.getURI();
+            LOGGER.debug(">>>>--{}", uri.toString());
+
+            int statusCode = httpClient.executeMethod(httpMethod);
+            if (statusCode != HttpStatus.SC_OK) {
+                LOGGER.error("执行Http Get方法出错ִ[{}]", statusCode);
+            }
+            result=httpMethod.getResponseBody();
+
+
+            return result;
+        } catch (Exception e) {
+            LOGGER.error("异常信息：[{}]", uri != null ? uri.toString() : thirdURL, e);
+        } finally {
+            httpMethod.releaseConnection();
+        }
+        return null;
+    }
     final static CloseableHttpClient httpclient = HttpClients.createDefault();
     static {
 

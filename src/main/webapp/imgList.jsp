@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+
 <html>
 
 
@@ -8,17 +10,18 @@
     <head>
         <link rel="stylesheet" type="text/css" class="ui" href="dist/semantic.css">
         <script src="js/jquery.min.js"></script>
-        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <%--<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">--%>
+        <%--<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>--%>
         <script src="dist/semantic.js"></script>
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="text/javascript">
+
             $(document).ready(function () {
 
-
-
+                //alert('<spring:eval expression="@srProperties.getProperty('redis.ip')" />')
+                pageSearch();
 
 
 
@@ -27,6 +30,7 @@
 
 
             });
+
             function processSearchResult(result) {
                 $('#imgList').empty();
 
@@ -84,11 +88,11 @@
                 paramsStr = JSON.stringify(paramsObj);
 
 
-                alert(paramsStr)
+               // alert(paramsStr)
                 paramsStr = encodeURIComponent(paramsStr);
 
                 $.ajax({
-                    url: "http://localhost:8080/inner/srservice/imageSearch.json",
+                    url: "<spring:eval expression="@srProperties.getProperty('srserviceUrlPrefix')" />"+"/inner/srservice/imageSearch.json",
                     dataType: "json",
                     type: "GET",
                     data: "params=" + paramsStr,
@@ -98,7 +102,7 @@
 
                     error: function (e) {
                         //called when there is an error
-                        alert("error to request");
+                        alert(e.data);
 
                     }
                 });
@@ -117,12 +121,13 @@
                 paramsObj.matchedTopNum = matchedTopNum;
                 paramsObj.imageId = id;
                 paramsObj.distanceType = distanceMeasureName;
+                //paramsObj.searchPolicy="text";
                 paramsStr = JSON.stringify(paramsObj);
-                alert(paramsStr)
+                //alert(paramsStr)
 
 
                 $.ajax({
-                    url: "http://localhost:8080/inner/srservice/imageSearch.json",
+                    url: "<spring:eval expression="@srProperties.getProperty('srserviceUrlPrefix')" />"+"/inner/srservice/imageSearch.json",
                     dataType: "json",
                     type: "GET",
                     data: "params=" + encodeURI(paramsStr),
@@ -210,7 +215,7 @@
         </div>
         <div class="ui input">
 
-            <input type="text" placeholder="页数" id="pageNum">
+            <input type="text" placeholder="页数" id="pageNum" value="1">
         </div>
 
 

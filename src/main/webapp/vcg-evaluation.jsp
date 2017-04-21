@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=utf-8" language="java" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><!--
 To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
@@ -47,7 +49,7 @@ and open the template in the editor.
             //  alert(paramsStr)
 
             $.ajax({
-                url: "http://localhost:8080/inner/srservice/search.json",
+                url: "<spring:eval expression="@srProperties.getProperty('srserviceUrlPrefix')" />"+"inner/srservice/search.json",
                 dataType: "json",
                 type: "GET",
                 data: "serviceName="+serviceName+"&params=" + paramsStr,

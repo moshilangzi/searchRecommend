@@ -11,12 +11,18 @@ import com.comm.sr.common.utils.DateTimeUtil;
 import com.comm.sr.common.utils.GsonHelper;
 import com.comm.sr.common.utils.HttpUtils;
 import com.comm.sr.service.SearchServiceFactory;
+import com.comm.sr.service.ServiceUtils;
 import com.comm.sr.service.score.ScriptService;
+import com.comm.sr.service.topic.TopicService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jayway.jsonpath.JsonPath;
 import com.yufei.utils.CommonUtil;
 import com.yufei.utils.ExceptionUtil;
+import com.yufei.utils.FileUtil;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import javafx.util.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.Precision;
@@ -26,9 +32,15 @@ import org.sql2o.Sql2o;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Created by jasstion on 16/02/2017.
@@ -542,65 +554,11 @@ private List<String> getImageStatistics(String imageId,List<String> kwIds){
 
 
 
-//    final ExecutorService executorService =
-//        new ThreadPoolExecutor(10, 10, 30, TimeUnit.SECONDS,
-//            new ArrayBlockingQueue<Runnable>(1), new ThreadPoolExecutor.CallerRunsPolicy());
-//
-//
-//
-//        String serviceName="vcgOnlineMockService";
-//      final  VcgOnlineMockService vcgBasedSearchService=
-//            (VcgOnlineMockService) SearchServiceFactory.vcgSearchServices.get(serviceName);
-//        List<String> ids= FileUtil.readLines("/data/vcg/ids_all_newab");
-//        List<List<String>> idss=CommonUtil.splitCollection(ids,10000);
-//
-//    for (List<String> tmp : idss) {
-//      executorService.submit(new Runnable() {
-//        @Override public void run() {
-//
-//          try {
-//            vcgBasedSearchService.getImageUrlInfo(tmp).forEach(new BiConsumer<String, String>() {
-//              @Override public void accept(String s, String s2) {
-//                String imageUrl = vcgBasedSearchService.imageDomain + s2;
-//                try {
-//                  URL url = new URL(imageUrl);
-//                  FileUtils
-//                      .copyURLToFile(url, new File("/data/mlib_data/images/vcg_creative/" + s + ".jpg"));
-//                  //
-//                  //            InputStream is = url.openStream();
-//                  //            FileOutputStream os = new FileOutputStream("/data/mlib_data/images/vcg_creative/"+s+".jpg");
-//                  //
-//                  //            byte[] b = new byte[2048];
-//                  //            int length;
-//                  //
-//                  //            while ((length = is.read(b)) != -1) {
-//                  //              os.write(b, 0, length);
-//                  //            }
-//                  //
-//                  //            is.close();
-//                  //            os.close();
-//                } catch (IOException e) {
-//                  System.out.print(e.getMessage());
-//                }
-//
-//              }
-//            });
-//          } catch (Exception e) {
-//            e.printStackTrace();
-//          }
-//
-//        }
-//      });
-//
-//
-//
-//
-//
-//
-//    }
+
     String imageDomain="http://bj-feiyuantu.oss-cn-beijing.aliyuncs.com/";
 
-    List<String> imageIds=Lists.newArrayList("200205080,201454132,200986697,202061007,201387604,200222965,201038461,200796559".split(","));
+    List<String> imageIds=Lists.newArrayList("\n" +
+            "400356016,207017860,206979572,407672839,212567816");
     String serviceName="vcgOnlineMockService";
     final  VcgOnlineMockService vcgBasedSearchService=
                 (VcgOnlineMockService) SearchServiceFactory.vcgSearchServices.get(serviceName);
@@ -617,6 +575,7 @@ private List<String> getImageStatistics(String imageId,List<String> kwIds){
 
 
 
+  
   }
 
 }

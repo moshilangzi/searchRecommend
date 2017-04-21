@@ -263,6 +263,13 @@
             <artifactId>log4j</artifactId>
             <version>${log4j.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -570,6 +577,7 @@
         <profile>
             
             <id>product_web</id>
+            
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -596,7 +604,8 @@
                             <source>1.8</source>
                             <target>1.8</target>
                             <encoding>${project.build.sourceEncoding}</encoding>
-                            <skip>false</skip>
+                            <skip>true</skip>
+                            
                         </configuration>
                     </plugin>
                   
