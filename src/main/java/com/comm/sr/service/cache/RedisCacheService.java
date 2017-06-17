@@ -2,9 +2,12 @@ package com.comm.sr.service.cache;
 
 import com.comm.sr.common.component.AbstractComponent;
 import com.comm.sr.service.SearchServiceFactory;
+import com.google.common.base.Stopwatch;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -16,36 +19,73 @@ import java.util.concurrent.TimeUnit;
  * Created by jasstion on 29/10/2016.
  */
 public class RedisCacheService extends AbstractComponent implements CacheService<String,String> {
-    private final Jedis jc;
-    public RedisCacheService(Properties settings) {
+    private JedisPool jedisPool=null;
+        public RedisCacheService(Properties settings) {
         super(settings);
         Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
         String redisHost=settings.getProperty("redis.ip");
         String redisPort=settings.getProperty("redis.port");
         String passwd=settings.getProperty("redis.passwd");
+       // jc = new Jedis(redisHost,Integer.parseInt(redisPort));
 
 
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(500);
+         jedisPool = new JedisPool(
+                poolConfig,
+                redisHost,
+                Integer.parseInt(redisPort),
+                3000,
+                null
+        );
 
-     jc = new Jedis(redisHost,Integer.parseInt(redisPort));
 
     }
 
 
     @Override
     public String get(String key) {
+        Stopwatch stopwatch=Stopwatch.createStarted();
+        String value=null;
+        Jedis jedis=null;
+        try {
+             jedis= jedisPool.getResource();
+            value = jedis.get(key);
+        }catch (Exception e){
+            jedisPool.returnBrokenResource(jedis);
 
-        return jc.get(key);
+        }finally {
+
+            jedisPool.returnResource(jedis);
+        }
+        stopwatch.stop();
+        long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
+        logger.info("spent "+timeSeconds+" s to get value from redis by key:"+key+"");
+
+
+        return value;
     }
 
     @Override
     public void set(String key, String value) {
-        jc.set(key,value);
+        Jedis jedis=null;
+        try {
+            jedis= jedisPool.getResource();
+            jedis.set(key,value);
+        }catch (Exception e){
+            jedisPool.returnBrokenResource(jedis);
+
+        }finally {
+
+            jedisPool.returnResource(jedis);
+        }
+
 
     }
 
     @Override
     public void set(String key, String value, int timeValues, TimeUnit timeUnit) {
-        jc.setex(key,timeValues,value);
+        jedisPool.getResource().setex(key,timeValues,value);
 
     }
     public static void main(String[] args){

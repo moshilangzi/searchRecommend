@@ -115,13 +115,15 @@
             function search(id) {
 
                 distanceMeasureName = $('#distanceMeasureName').val();
+                groupNum = $('#groupNum').val();
                 //  alert(text);
                 paramsObj = new Object();
                 matchedTopNum=20;
                 paramsObj.matchedTopNum = matchedTopNum;
                 paramsObj.imageId = id;
                 paramsObj.distanceType = distanceMeasureName;
-                //paramsObj.searchPolicy="text";
+                paramsObj.groupNum=groupNum;
+
                 paramsStr = JSON.stringify(paramsObj);
                 //alert(paramsStr)
 
@@ -231,6 +233,22 @@
             <option value="canberra">canberra</option>
             <option value="manhattan">manhattan</option>
             <option value="chebyshev">chebyshev</option>
+
+
+
+        </select>
+
+
+
+
+        <label class="ui">groupNum：</label>
+        <select class="ui dropdown" id="groupNum">
+            <option value="1">1</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="7">7</option>
+            <option value="9">9</option>
+             <option value="10">10</option>
 
 
 

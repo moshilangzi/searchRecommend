@@ -17,7 +17,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -226,32 +228,34 @@ public class HttpUtils {
         }
         return nvps;
     }
-    public static void main(String[] args){
-        String testUrl="http://search.vcg.csdn.net/search?_client_=creative";
-        //perpage:300
-        //page:1
-        Map<String,Object> requestParames= Maps.newHashMap();
-        requestParames.put("phrase","sky");
-        requestParames.put("onlineState","1");
-        requestParames.put("debug",true);
-        requestParames.put("perpage","100");
-        requestParames.put("page","1");
-        requestParames.put("sort","best_adv");
-        requestParames.put("fields",Lists.newArrayList("brandId","collectionId","resId","uploadTime","licenseType"));
-
-       // "fields":["collectionId","resId","uploadTime","licenseType"]
-
-        String str=HttpUtils.executeWithHttpPost(testUrl,requestParames);
-        System.out.print(str);
-        List<String> kwIds= Lists.newArrayList();
-        JSONObject topObject= JSON.parseObject(str);
-        kwIds = JsonPath.read(str, "$.debug.keywordDetail.kids");
-        List<Map<String, String>> images =  JsonPath.parse(str).read("$.datas[*]");
-
-
-        LOGGER.error(kwIds.toString());
-        LOGGER.info(images.toString());
-        LOGGER.info(images.toString());
+    public static void main(String[] args) throws UnsupportedEncodingException {
+//        String testUrl="http://search.vcg.csdn.net/search?_client_=creative";
+//        //perpage:300
+//        //page:1
+//        Map<String,Object> requestParames= Maps.newHashMap();
+//        requestParames.put("phrase","sky");
+//        requestParames.put("onlineState","1");
+//        requestParames.put("debug",true);
+//        requestParames.put("perpage","100");
+//        requestParames.put("page","1");
+//        requestParames.put("sort","best_adv");
+//        requestParames.put("fields",Lists.newArrayList("brandId","collectionId","resId","uploadTime","licenseType"));
+//
+//       // "fields":["collectionId","resId","uploadTime","licenseType"]
+//
+//        String str=HttpUtils.executeWithHttpPost(testUrl,requestParames);
+//        System.out.print(str);
+//        List<String> kwIds= Lists.newArrayList();
+//        JSONObject topObject= JSON.parseObject(str);
+//        kwIds = JsonPath.read(str, "$.debug.keywordDetail.kids");
+//        List<Map<String, String>> images =  JsonPath.parse(str).read("$.datas[*]");
+//
+//
+//        LOGGER.error(kwIds.toString());
+//        LOGGER.info(images.toString());
+//        LOGGER.info(images.toString());
+String str="http://60.205.226.115:8080/inner/srservice/matchImageBasedImageUrl.json?fields=imageId&topNum=10&groupNum=3&scoreThresholdValue=5&distanceType=euclidean&imageUrl=http%3A%2F%2Fww3.sinaimg.cn%2Forj360%2Fb7d8c289jw1exuvy4rg3aj20go0b1mzi.jpg";
+System.out.println(HttpUtils.executeWithHttp(str));
 
 
 

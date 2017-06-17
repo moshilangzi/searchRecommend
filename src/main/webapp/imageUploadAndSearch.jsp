@@ -11,8 +11,6 @@
         <link rel="stylesheet" type="text/css" class="ui" href="dist/semantic.css">
         <script src="js/jquery.min.js"></script>
         <script src="js/simpleUpload.min.js"></script>
-        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script src="dist/semantic.js"></script>
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
@@ -59,7 +57,7 @@
                         content=content+"<div class='content'>";
                         content=content+"<div class='meta'>名称: "+image.imageId+" </div>";
 
-
+                       content=content+"<div class='meta'>得分: "+image.score+" </div>";
 
 
 
@@ -84,7 +82,8 @@
 
             function imageUploadAndSearch(){
                 distanceType=$('#distanceMeasureName').val();
-                $('#fileId').simpleUpload("<spring:eval expression="@srProperties.getProperty('srserviceUrlPrefix')" />"+"inner/srservice/imageUploadAndSearch.json?distanceType="+distanceType, {
+                groupNum = $('#groupNum').val();
+                $('#fileId').simpleUpload("<spring:eval expression="@srProperties.getProperty('srserviceUrlPrefix')" />"+"inner/srservice/imageUploadAndSearch.json?groupNum="+groupNum+"&distanceType="+distanceType, {
 
 //                        start: function(file){
 //                            //upload started
@@ -102,7 +101,7 @@
                     success: function(data){
                         //upload successful
                         //$('#progress').html("Success!<br>Data: " + JSON.stringify(data));
-                       //alert("success")
+                        alert("success")
                         showSimi(data)
                         $('.ui.modal')
                                 .modal('show')
@@ -160,6 +159,21 @@
 
                     </select>
                 </div>
+                <div class="field">
+                 <label class="ui">groupNum：</label>
+                        <select class="ui dropdown" id="groupNum">
+                            <option value="1">1</option>
+                            <option value="3">3</option>
+                            <option value="5">5</option>
+                            <option value="7">7</option>
+                            <option value="9">9</option>
+                             <option value="10">10</option>
+
+
+
+                        </select>
+                                        </div>
+
                 <div class="field">
                     <label>上传图片</label>
                     <input type="file" name="file" id="fileId">

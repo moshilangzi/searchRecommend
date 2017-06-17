@@ -7,5 +7,6 @@ public interface TopicService {
 
 
     public void publishTopicMessage(String topic,String message);
+    public void publishTopicMessage(String topic,String key,String message);
     public void publishTopicMessage(String topic,byte[] key,byte[] message);
 }

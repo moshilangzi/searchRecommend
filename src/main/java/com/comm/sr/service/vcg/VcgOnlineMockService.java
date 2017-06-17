@@ -10,19 +10,12 @@ import com.comm.sr.common.entity.SubQuery;
 import com.comm.sr.common.utils.DateTimeUtil;
 import com.comm.sr.common.utils.GsonHelper;
 import com.comm.sr.common.utils.HttpUtils;
-import com.comm.sr.service.SearchServiceFactory;
-import com.comm.sr.service.ServiceUtils;
 import com.comm.sr.service.score.ScriptService;
-import com.comm.sr.service.topic.TopicService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jayway.jsonpath.JsonPath;
 import com.yufei.utils.CommonUtil;
 import com.yufei.utils.ExceptionUtil;
-import com.yufei.utils.FileUtil;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import javafx.util.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.Precision;
@@ -32,15 +25,9 @@ import org.sql2o.Sql2o;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Created by jasstion on 16/02/2017.
@@ -539,35 +526,41 @@ private List<String> getImageStatistics(String imageId,List<String> kwIds){
 
 
 
-//    Map<String,String> brandsMap=(Map<String,String>)CommonUtil.deSerializeObj("/data/vcg/brandsMap.obj");
-//
-//
-//    //Maps.newHashMap();
-//    //brandId->brandType
-//    Map<String,String> brandTypeMap=(Map<String,String>)CommonUtil.deSerializeObj("/data/vcg/brandTypeMap.obj");
-//
-//    System.out.print(brandsMap.get("11987")+"\n");
-//    //local
-//    System.out.print(brandTypeMap.get("10181")+"\n");
-//    //gi
-//    System.out.print(brandTypeMap.get("10572")+"\n");
+    Map<String,String> brandsMap=(Map<String,String>)CommonUtil.deSerializeObj("/data/vcg/kwWordMap.obj");
 
 
+    //Maps.newHashMap();
+    //brandId->brandType
+    //Map<String,String> brandTypeMap=(Map<String,String>)CommonUtil.deSerializeObj("/data/vcg/brandTypeMap.obj");
 
-
-    String imageDomain="http://bj-feiyuantu.oss-cn-beijing.aliyuncs.com/";
-
-    List<String> imageIds=Lists.newArrayList("\n" +
-            "400356016,207017860,206979572,407672839,212567816");
-    String serviceName="vcgOnlineMockService";
-    final  VcgOnlineMockService vcgBasedSearchService=
-                (VcgOnlineMockService) SearchServiceFactory.vcgSearchServices.get(serviceName);
-    vcgBasedSearchService.getImageUrlInfo(imageIds).forEach(new BiConsumer<String, String>() {
-      @Override public void accept(String s, String s2) {
-        System.out.print(s+";"+imageDomain+s2+"\n");
-
-      }
+    brandsMap.forEach(new BiConsumer<String, String>() {
+        @Override
+        public void accept(String s, String s2) {
+            System.out.println(""+s+":"+s2+"\n");
+        }
     });
+    //local
+   // System.out.print(brandTypeMap.get("10181")+"\n");
+    //gi
+   // System.out.print(brandTypeMap.get("4163")+"\n");
+
+
+
+
+//    String imageDomain="http://bj-feiyuantu.oss-cn-beijing.aliyuncs.com/";
+//
+//    List<String> imageIds=Lists.newArrayList("\n" +
+//            "406007480",
+//            "202565113");
+//    String serviceName="vcgOnlineMockService";
+//    final  VcgOnlineMockService vcgBasedSearchService=
+//                (VcgOnlineMockService) SearchServiceFactory.vcgSearchServices.get(serviceName);
+//    vcgBasedSearchService.getImageUrlInfo(imageIds).forEach(new BiConsumer<String, String>() {
+//      @Override public void accept(String s, String s2) {
+//        System.out.print(s+";"+imageDomain+s2+"\n");
+//
+//      }
+//    });
 
 
 

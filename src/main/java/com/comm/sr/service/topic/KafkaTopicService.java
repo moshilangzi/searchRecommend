@@ -55,8 +55,27 @@ public class KafkaTopicService extends AbstractComponent implements TopicService
         }
 
     }
+
+    @Override
+    public void publishTopicMessage(String topic, String key, String message) {
+        try {
+            KeyedMessage<String, String> data =
+                    new KeyedMessage<String, String>(topic, key, message);
+
+            producer.send(data);
+            if (logger.isDebugEnabled()) {
+                logger.debug("succeed to send message[{}]", data);
+            }
+        }catch (Exception e){
+
+            logger.info("error to send message to kafka!, exception message:"+ ExceptionUtil.getExceptionDetailsMessage(e)+"");
+        }
+
+    }
+
     @Override
     public void publishTopicMessage(String topic,byte[] key,byte[] message){
+
         producer.send(new KeyedMessage(topic, key,message));
 
     }
@@ -65,6 +84,7 @@ public class KafkaTopicService extends AbstractComponent implements TopicService
     protected void finalize() throws Throwable {
         super.finalize();
         producer.close();
+
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -74,7 +94,7 @@ public class KafkaTopicService extends AbstractComponent implements TopicService
 
        // props.put("request.required.acks", "1");
         byte[] bytes= IOUtils.translantStreamToByte(new FileInputStream(new File(
-            "/data/mlib_data/images/images_test/vcg_creative/201273662.jpg")));
+                "/data/mlib_data/images/images_test/vcg_creative/201273662.jpg")));
 
         //Producer producer = new Producer<String, String>(new ProducerConfig(props));
         //producer.send(new KeyedMessage("image_upload", "4534460263_8e9611db3c_n".getBytes(),bytes));

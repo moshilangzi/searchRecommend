@@ -124,7 +124,7 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
             Map<String, Object> values = hit.getSource();
             float score=hit.getScore();
 
-            if(score>0f){
+            if(score>=0f){
                 values.put("score",score);
             }
 

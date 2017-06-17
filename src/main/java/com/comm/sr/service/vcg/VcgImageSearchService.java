@@ -10,7 +10,6 @@ import com.comm.sr.common.entity.SortItem;
 import com.comm.sr.common.entity.SubQuery;
 import com.comm.sr.common.kd.KDTree;
 import com.comm.sr.common.utils.GsonHelper;
-import com.comm.sr.common.utils.HttpUtils;
 import com.comm.sr.service.ServiceUtils;
 import com.comm.sr.service.cache.CacheService;
 import com.comm.sr.service.topic.TopicService;
@@ -18,6 +17,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.yufei.utils.ExceptionUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
@@ -29,6 +29,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -84,6 +85,12 @@ public static class ImageSearchParams {
   private String matchPictureUrl;
   //vec or text
   private String searchPolicy=null;
+  private int groupNum=1;
+
+  private double scoreThresholdValue=10d;
+  //creative or editorial,  contains 'editorial' is editorial, else creative
+  private String imageIndexName="vcg_image";
+
 
 
   @Override public String toString() {
@@ -92,6 +99,31 @@ public static class ImageSearchParams {
         ", distanceType='" + distanceType + '\'' +
         ", matchedTopNum=" + matchedTopNum +
         '}';
+  }
+
+
+  public String getImageIndexName() {
+    return imageIndexName;
+  }
+
+  public void setImageIndexName(String imageIndexName) {
+    this.imageIndexName = imageIndexName;
+  }
+
+  public double getScoreThresholdValue() {
+    return scoreThresholdValue;
+  }
+
+  public void setScoreThresholdValue(double scoreThresholdValue) {
+    this.scoreThresholdValue = scoreThresholdValue;
+  }
+
+  public int getGroupNum() {
+    return groupNum;
+  }
+
+  public void setGroupNum(int groupNum) {
+    this.groupNum = groupNum;
   }
 
   public String getMatchPictureUrl() {
@@ -174,13 +206,16 @@ public static class ImageSearchParams {
     ImageSearchParams searchParams=(ImageSearchParams) GsonHelper
         .jsonToObj(searchParamsStr, ImageSearchParams.class);
      EsCommonQuery query=null;
+     //maybe creative or editorial
+     final String indexName=searchParams.getImageIndexName();
+     final String typeName="image";
 
      if(searchParams.getImageId()==null&&searchParams.getcNNFeatures()==null&&searchParams.getMatchPictureUrl()==null){
        //list images
        int pageNumber=searchParams.getPageNum();
        int pageSize=searchParams.getFetchSize();
-       String indexName="vcg_image";
-       String typeName="image";
+
+
        query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("imageId","desc")), Lists.newArrayList("imageId"), indexName, typeName);
        SubQuery finalSubQuery=new SubQuery();
        QueryItem queryItem=new QueryItem("groupId",Lists.newArrayList("-1TO100000"));
@@ -192,7 +227,17 @@ public static class ImageSearchParams {
 
        String imageId = UUID.randomUUID().toString();
        TopicService topicBytesService = ServiceUtils.getByteTopicService();
-       byte[] imageBytes= HttpUtils.executeWithHttpImageUrl(searchParams.getMatchPictureUrl(),null);
+       Stopwatch stopwatch=Stopwatch.createStarted();
+
+
+       //byte[] imageBytes= HttpUtils.executeWithHttpImageUrl(searchParams.getMatchPictureUrl(),null);
+
+       URL url = new URL(searchParams.getMatchPictureUrl());
+
+       byte[] imageBytes = IOUtils.toByteArray(url.openStream());
+       stopwatch.stop();
+       long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
+       logger.info("spent "+timeSeconds+" s to fetch "+searchParams.getMatchPictureUrl()+"");
        topicBytesService.publishTopicMessage("uploadedImageForSearch", imageId.getBytes(), imageBytes);
        Thread.currentThread().sleep(3*1000);
        CacheService<String, String> redisCacheService = ServiceUtils.getCacheService();
@@ -207,6 +252,9 @@ public static class ImageSearchParams {
       query=matchedImageBasedOnCNNFeatures(searchParams);
 
 
+
+
+
      }
      else{
        //已有图搜索
@@ -215,8 +263,7 @@ public static class ImageSearchParams {
          if(searchParams.getSearchPolicy()==null||searchParams.getSearchPolicy().equals("vec")){
            int pageNumber=1;
            int pageSize=searchParams.getMatchedTopNum();
-           String indexName="vcg_image";
-           String typeName="image";
+
            query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("_score","asc")), Lists.newArrayList("imageId"), indexName, typeName);
            query.setClusterIdentity("vcgImage");
            Map<String,Object> scriptParams= Maps.newHashMap();
@@ -228,7 +275,7 @@ public static class ImageSearchParams {
           // Integer groupId=getGroupIdBasedOnCNNFeature(cNNFeatures);
            Integer groupId=Integer.parseInt(results[1]);
            cNNFeatures=results[0];
-           List<String> groupIds=getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures);
+           List<String> groupIds=getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures,searchParams.getGroupNum());
 
            SubQuery finalSubQuery=new SubQuery();
            if(groupIds!=null){
@@ -285,7 +332,11 @@ public static class ImageSearchParams {
 
        results.forEach(new Consumer<Map<String, Object>>() {
          @Override public void accept(Map<String, Object> stringObjectMap) {
-           stringObjectMap.put("url",idUrlMap.get(stringObjectMap.get("imageId")));
+           String url=idUrlMap.get(stringObjectMap.get("imageId"));
+           if(url==null){
+             url="";
+           }
+           stringObjectMap.put("url",url);
          }
        });
      }
@@ -295,7 +346,12 @@ public static class ImageSearchParams {
        results.forEach(new Consumer<Map<String, Object>>() {
          @Override
          public void accept(Map<String, Object> map) {
-           map.put("imageId",Integer.parseInt((String)map.get("imageId"))+600000000);
+           if(!indexName.contains("editorial")){
+             // change imageId if creative image
+
+             map.put("imageId",Integer.parseInt((String)map.get("imageId"))+600000000);
+           }
+
 
          }
        });
@@ -306,6 +362,16 @@ public static class ImageSearchParams {
 
 
      finalResults.put("result",results);
+     if(results.size()>0){
+
+       double score=Double.parseDouble(String.valueOf(results.get(0).get("score")==null?0:results.get(0).get("score")));
+       if(score<=searchParams.getScoreThresholdValue()){
+         finalResults.put("sameImageId",results.get(0).get("imageId"));
+
+       }
+
+     }
+
 
 
     return finalResults;
@@ -315,9 +381,8 @@ public static class ImageSearchParams {
     EsCommonQuery query;
     int pageNumber=1;
     int pageSize=searchParams.getMatchedTopNum();
-    String indexName="vcg_image";
     String typeName="image";
-    query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("_score","asc")), Lists.newArrayList("imageId"), indexName, typeName);
+    query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("_score","asc")), Lists.newArrayList("imageId"), searchParams.getImageIndexName(), typeName);
     SubQuery finalSubQuery=new SubQuery();
 
     query.setClusterIdentity("vcgImage");
@@ -326,7 +391,7 @@ public static class ImageSearchParams {
 
 
     //Integer groupId=getGroupIdBasedOnCNNFeatureUsingKdTree(cNNFeatures);
-    List<String> groupIds=getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures);
+    List<String> groupIds=getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures,searchParams.getGroupNum());
     if(groupIds!=null){
 
      QueryItem queryItem=new QueryItem("groupId",groupIds);
@@ -453,14 +518,19 @@ public static class ImageSearchParams {
     return groupId;
   }
 
-  private List<String> getGroupIdsBasedOnCNNFeatureUsingKdTree(String cNNFeature) throws Exception {
+  private List<String> getGroupIdsBasedOnCNNFeatureUsingKdTree(String cNNFeature,int groupNum) throws Exception {
+
+    if(groupNum>10){
+      groupNum=10;
+    }
+    String imageCenterVectorKeyPrefix=settings.getProperty("image.centerVectorKeyPrefix");
+    Integer clusterNum=Integer.parseInt(settings.getProperty("image.cluster.num"));
 
     List<String> groupIds=null;
 
     if(kdTree.size()==0){
       if(this.cacheService!=null){
-        String imageCenterVectorKeyPrefix=settings.getProperty("image.centerVectorKeyPrefix");
-        Integer clusterNum=Integer.parseInt(settings.getProperty("image.cluster.num"));
+
         for(int i=0;i<clusterNum;i++){
           String key=imageCenterVectorKeyPrefix+i;
           String vecStr=cacheService.get(key);
@@ -481,13 +551,18 @@ public static class ImageSearchParams {
 
 
 
-      stopwatch.stop();
-      long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
+
       double[] vec = Lists.newArrayList(cNNFeature.split(",")).parallelStream()
               .mapToDouble(va -> Double.parseDouble(va)).toArray();
+//      int targetGroupId=kdTree.nearest(vec);
+//      String key=imageCenterVectorKeyPrefix+targetGroupId;
+//      double[] targetGroupVec=Lists.newArrayList(cacheService.get(key).split(",")).parallelStream()
+//              .mapToDouble(va -> Double.parseDouble(va)).toArray();
 
-      int topMatchedGroupIdNum= Integer.parseInt(settings.getProperty("topMatchedGroupIdNum"));
-      groupIds=kdTree.nearest(vec,topMatchedGroupIdNum).stream().map(val -> String.valueOf(val)).collect(Collectors.toList());
+      //int topMatchedGroupIdNum= Integer.parseInt(settings.getProperty("topMatchedGroupIdNum"));
+      groupIds=kdTree.nearest(vec,groupNum).stream().map(val -> String.valueOf(val)).collect(Collectors.toList());
+      stopwatch.stop();
+      long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
       logger.info("spent "+timeSeconds+" s to get target vector's groupIds: "+groupIds.toString()+"");
 
 
@@ -612,19 +687,21 @@ public static class ImageSearchParams {
 
 
     Connection con = sql2o.open();
-    String tableName = "resource";
+    String tableName = "res_image";
     StringBuffer clause=new StringBuffer();
+    imageIds = imageIds.parallelStream().map(va -> String.valueOf(Integer.parseInt(va) + 600000000)).collect(Collectors.toList());
+
     clause.append("(").append(org.apache.commons.lang3.StringUtils.join(imageIds,",")).append(")");
 
-    String sql="select oss_id5,id from resource where id in "+clause.toString();
+    String sql="select oss_800,id from res_image where id in "+clause.toString();
     logger.debug(sql);
     List<Map<String, Object>>  re=con.createQuery(sql).executeAndFetchTable().asList();
     for (Map<String, Object> map:re){
       try {
-        if (!map.containsKey("oss_id5") || !map.containsKey("id")) {
+        if (!map.containsKey("oss_800") || !map.containsKey("id")) {
           continue;
         }
-        results.put(map.get("id").toString(), ossImagePrefix+map.get("oss_id5").toString());
+        results.put(String.valueOf(((Long)map.get("id")).intValue()-600000000), ossImagePrefix+map.get("oss_800").toString());
       }catch (Exception e){
         logger.info(ExceptionUtil.getExceptionDetailsMessage(e));
         logger.debug(map.toString());
