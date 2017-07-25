@@ -86,7 +86,7 @@ public static class ImageSearchParams {
   //vec or text
   private String searchPolicy=null;
   private int groupNum=1;
-
+  private String clusterIndentity="vcgImage";
   private double scoreThresholdValue=10d;
   //creative or editorial,  contains 'editorial' is editorial, else creative
   private String imageIndexName="vcg_image";
@@ -101,6 +101,13 @@ public static class ImageSearchParams {
         '}';
   }
 
+  public String getClusterIndentity() {
+    return clusterIndentity;
+  }
+
+  public void setClusterIndentity(String clusterIndentity) {
+    this.clusterIndentity = clusterIndentity;
+  }
 
   public String getImageIndexName() {
     return imageIndexName;
@@ -221,7 +228,7 @@ public static class ImageSearchParams {
        QueryItem queryItem=new QueryItem("groupId",Lists.newArrayList("-1TO100000"));
        finalSubQuery.setQueryItem(queryItem);
        query.setSubQuery(finalSubQuery);
-       query.setClusterIdentity("vcgImage");
+       query.setClusterIdentity(searchParams.getClusterIndentity());
      }
      else if(searchParams.getMatchPictureUrl()!=null){
 
@@ -265,11 +272,11 @@ public static class ImageSearchParams {
            int pageSize=searchParams.getMatchedTopNum();
 
            query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("_score","asc")), Lists.newArrayList("imageId"), indexName, typeName);
-           query.setClusterIdentity("vcgImage");
+           query.setClusterIdentity(searchParams.getClusterIndentity());
            Map<String,Object> scriptParams= Maps.newHashMap();
            String cNNFeatures=null;
            //get cNNFeatures from index by imageId, also get groupId
-           String[] results=getCNNFeaturesByImageId(searchParams.getImageId());
+           String[] results=getCNNFeaturesByImageId(searchParams.getImageId(),searchParams);
            //groupId filter
 
           // Integer groupId=getGroupIdBasedOnCNNFeature(cNNFeatures);
@@ -307,7 +314,7 @@ public static class ImageSearchParams {
      //EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(query);
      //features full text search
      if(searchParams.getSearchPolicy()!=null&&searchParams.getSearchPolicy().equals("text")){
-       String cNNFeaturesText=getCNNFeaturesTextByImageId(searchParams.getImageId());
+       String cNNFeaturesText=getCNNFeaturesTextByImageId(searchParams.getImageId(),searchParams);
       results =matchCNNFeatures(cNNFeaturesText,searchParams.getMatchedTopNum());
 
 
@@ -385,7 +392,7 @@ public static class ImageSearchParams {
     query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("_score","asc")), Lists.newArrayList("imageId"), searchParams.getImageIndexName(), typeName);
     SubQuery finalSubQuery=new SubQuery();
 
-    query.setClusterIdentity("vcgImage");
+    query.setClusterIdentity(searchParams.getClusterIndentity());
     Map<String,Object> scriptParams= Maps.newHashMap();
     String cNNFeatures=searchParams.getcNNFeatures();
 
@@ -446,13 +453,13 @@ public static class ImageSearchParams {
     return results;
 
   }
-  private String getCNNFeaturesTextByImageId(String imageId)throws Exception{
+  private String getCNNFeaturesTextByImageId(String imageId, VcgImageSearchService.ImageSearchParams searchParams)throws Exception{
     String indexName="vcg_image";
     String typeName="image";
     String cNNFeaturesText=null;
     EsCommonQuery query=null;
     query= new EsCommonQuery(1,1,null, Lists.newArrayList("cNNFeaturesText"), indexName, typeName);
-    query.setClusterIdentity("vcgImage");
+    query.setClusterIdentity(searchParams.getClusterIndentity());
     SubQuery subQuery=new SubQuery("AND",new QueryItem("imageId",Lists.newArrayList(imageId)));
     query.setSubQuery(subQuery);
     List<Map<String,Object>> results= queryService.processQuery(query);
@@ -641,14 +648,14 @@ public static class ImageSearchParams {
     return groupId;
 
   }
-  private String[] getCNNFeaturesByImageId(String imageId) throws Exception{
+  private String[] getCNNFeaturesByImageId(String imageId,VcgImageSearchService.ImageSearchParams searchParams) throws Exception{
     String[] results=new String[2];
     String indexName="vcg_image";
     String typeName="image";
     String cNNFeatures=null;
     EsCommonQuery query=null;
     query= new EsCommonQuery(1,1,null, Lists.newArrayList("cNNFeatures","groupId"), indexName, typeName);
-    query.setClusterIdentity("vcgImage");
+    query.setClusterIdentity(searchParams.getClusterIndentity());
     SubQuery subQuery=new SubQuery("AND",new QueryItem("imageId",Lists.newArrayList(imageId)));
     query.setSubQuery(subQuery);
     List<Map<String,Object>> results_= queryService.processQuery(query);
