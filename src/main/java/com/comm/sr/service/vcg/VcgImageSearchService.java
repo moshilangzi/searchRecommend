@@ -17,6 +17,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.yufei.utils.ExceptionUtil;
+import com.yufei.utils.StringUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.elasticsearch.action.search.SearchResponse;
@@ -282,7 +283,7 @@ public static class ImageSearchParams {
           // Integer groupId=getGroupIdBasedOnCNNFeature(cNNFeatures);
            Integer groupId=Integer.parseInt(results[1]);
            cNNFeatures=results[0];
-           List<String> groupIds=getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures,searchParams.getGroupNum());
+           List<String> groupIds=getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures,searchParams.getGroupNum(),searchParams.getImageIndexName());
 
            SubQuery finalSubQuery=new SubQuery();
            if(groupIds!=null){
@@ -398,7 +399,7 @@ public static class ImageSearchParams {
 
 
     //Integer groupId=getGroupIdBasedOnCNNFeatureUsingKdTree(cNNFeatures);
-    List<String> groupIds=getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures,searchParams.getGroupNum());
+    List<String> groupIds=getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures,searchParams.getGroupNum(),searchParams.getImageIndexName());
     if(groupIds!=null){
 
      QueryItem queryItem=new QueryItem("groupId",groupIds);
@@ -478,68 +479,39 @@ public static class ImageSearchParams {
 
     return cNNFeaturesText;
   }
-  protected  final static KDTree<Integer> kdTree=new KDTree<Integer>(2048);
-  private Integer getGroupIdBasedOnCNNFeatureUsingKdTree(String cNNFeature) throws Exception {
+  //protected  final static KDTree<Integer> kdTree=new KDTree<Integer>(2048);
 
-    Integer groupId=null;
+  protected  final static Map<String,KDTree<Integer>> kdTrees=Maps.newHashMap();
 
-    if(kdTree.size()==0){
-      if(this.cacheService!=null){
-        String imageCenterVectorKeyPrefix=settings.getProperty("image.centerVectorKeyPrefix");
-        Integer clusterNum=Integer.parseInt(settings.getProperty("image.cluster.num"));
-        for(int i=0;i<clusterNum;i++){
-          String key=imageCenterVectorKeyPrefix+i;
-          String vecStr=cacheService.get(key);
-          double[] vec = Lists.newArrayList(vecStr.split(",")).parallelStream()
-                  .mapToDouble(va -> Double.parseDouble(va)).toArray();
-          kdTree.insert(vec,i);
-
-
-        }
-
-      }
-
-    }
-
-    if(kdTree.size()>0){
-      Stopwatch stopwatch=Stopwatch.createStarted();
-
-
-
-
-      stopwatch.stop();
-      long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
-      double[] vec = Lists.newArrayList(cNNFeature.split(",")).parallelStream()
-              .mapToDouble(va -> Double.parseDouble(va)).toArray();
-      groupId=kdTree.nearest(vec);
-      logger.info("spent "+timeSeconds+" s to get target vector's groupId: "+groupId+"");
-
-
-
-
-    }
-
-
-
-
-    return groupId;
-  }
-
-  private List<String> getGroupIdsBasedOnCNNFeatureUsingKdTree(String cNNFeature,int groupNum) throws Exception {
+//
+//  private List<String> getGroupIdsBasedOnCNNFeatureUsingKdTree(String cNNFeature,int groupNum) throws Exception {
+//    return getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeature,groupNum,null);
+//  }
+  private List<String> getGroupIdsBasedOnCNNFeatureUsingKdTree(String cNNFeature,int groupNum,String indexName) throws Exception {
 
     if(groupNum>10){
       groupNum=10;
     }
     String imageCenterVectorKeyPrefix=settings.getProperty("image.centerVectorKeyPrefix");
-    Integer clusterNum=Integer.parseInt(settings.getProperty("image.cluster.num"));
+    Integer clusterNum=Integer.parseInt(settings.getProperty(indexName+".image.cluster.num"));
+    String preKey="";
+
+    if(StringUtils.isEmpty(indexName)){
+     throw  new IllegalArgumentException("indexName can not be empty!");
+
+    }
+
+    preKey=imageCenterVectorKeyPrefix+indexName+"_";
 
     List<String> groupIds=null;
+    KDTree<Integer> kdTree =kdTrees.get(preKey);
 
-    if(kdTree.size()==0){
+    if(kdTree==null){
       if(this.cacheService!=null){
+        kdTree=new KDTree<Integer>(2048);
 
         for(int i=0;i<clusterNum;i++){
-          String key=imageCenterVectorKeyPrefix+i;
+          String key=preKey+i;
           String vecStr=cacheService.get(key);
           double[] vec = Lists.newArrayList(vecStr.split(",")).parallelStream()
                   .mapToDouble(va -> Double.parseDouble(va)).toArray();
@@ -547,10 +519,12 @@ public static class ImageSearchParams {
 
 
         }
+        kdTrees.put(preKey,kdTree);
 
       }
 
     }
+
 
     if(kdTree.size()>0){
       Stopwatch stopwatch=Stopwatch.createStarted();
@@ -561,12 +535,6 @@ public static class ImageSearchParams {
 
       double[] vec = Lists.newArrayList(cNNFeature.split(",")).parallelStream()
               .mapToDouble(va -> Double.parseDouble(va)).toArray();
-//      int targetGroupId=kdTree.nearest(vec);
-//      String key=imageCenterVectorKeyPrefix+targetGroupId;
-//      double[] targetGroupVec=Lists.newArrayList(cacheService.get(key).split(",")).parallelStream()
-//              .mapToDouble(va -> Double.parseDouble(va)).toArray();
-
-      //int topMatchedGroupIdNum= Integer.parseInt(settings.getProperty("topMatchedGroupIdNum"));
       groupIds=kdTree.nearest(vec,groupNum).stream().map(val -> String.valueOf(val)).collect(Collectors.toList());
       stopwatch.stop();
       long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
@@ -582,72 +550,8 @@ public static class ImageSearchParams {
 
     return groupIds;
   }
-  private Integer getGroupIdBasedOnCNNFeature(String cNNFeature) throws Exception {
-    Integer groupId=null;
-    if(imageCenterVectorToGroupMap.isEmpty()){
-      if(this.cacheService!=null){
-        String imageCenterVectorKeyPrefix=settings.getProperty("image.centerVectorKeyPrefix");
-        Integer clusterNum=Integer.parseInt(settings.getProperty("image.cluster.num"));
-        for(int i=0;i<clusterNum;i++){
-          String key=imageCenterVectorKeyPrefix+i;
-            imageCenterVectorToGroupMap.put(cacheService.get(key),i);
 
 
-        }
-
-      }
-
-    }
-
-    if(!imageCenterVectorToGroupMap.isEmpty()){
-      Stopwatch stopwatch=Stopwatch.createStarted();
-
-
-      String distanceMeasureName="euclidean";
-
-      DistanceMeasure distanceMeasure= DistanceMeasureFactory.createDistanceMeasure(distanceMeasureName);
-      Optional<String> vector=imageCenterVectorToGroupMap.keySet().parallelStream().max(
-          new Comparator<String>() {
-            @Override public int compare(String v1, String v2) {
-
-              double[] v1s = Lists.newArrayList(v1.split(",")).parallelStream()
-                  .mapToDouble(va -> Double.parseDouble(va)).toArray();
-              double[] v2s = Lists.newArrayList(v2.split(",")).parallelStream()
-                  .mapToDouble(va -> Double.parseDouble(va)).toArray();
-              double[] vs = Lists.newArrayList(cNNFeature.split(",")).parallelStream()
-                  .mapToDouble(va -> Double.parseDouble(va)).toArray();
-              double v1Ditance = distanceMeasure.compute(v1s, vs);
-              double v2Distance = distanceMeasure.compute(v2s, vs);
-              double comparedValue =v2Distance-v1Ditance;
-              if (comparedValue > 0) {
-                return 1;
-
-              }
-              if (comparedValue == 0) {
-                return 0;
-
-              } else {
-                return -1;
-              }
-
-            }
-          });
-      String v=vector.get();
-      stopwatch.stop();
-      long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
-      groupId=imageCenterVectorToGroupMap.get(v);
-      logger.info("spent "+timeSeconds+" s to get target vector's groupId: "+groupId+"");
-
-
-
-
-    }
-
-
-
-    return groupId;
-
-  }
   private String[] getCNNFeaturesByImageId(String imageId,VcgImageSearchService.ImageSearchParams searchParams) throws Exception{
     String[] results=new String[2];
     String indexName="vcg_image";
