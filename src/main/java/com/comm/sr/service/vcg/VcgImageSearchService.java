@@ -19,6 +19,9 @@ import com.google.common.collect.Maps;
 import com.yufei.utils.ExceptionUtil;
 import com.yufei.utils.StringUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.MutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
@@ -30,6 +33,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -74,6 +78,21 @@ public class VcgImageSearchService extends AbstractComponent{
   }
 
 
+  private enum SearchType {
+    BATCH("batchImageSearch"),
+    SINGLE("singleImageSearch");
+    private String searchType="singleImageSearch";
+
+    SearchType(String searchType) {
+      this.searchType = searchType;
+    }
+
+    @Override
+    public String toString() {
+      return searchType;
+    }
+  }
+
 public static class ImageSearchParams {
   private String distanceType=null;
   private String cNNFeatures=null;
@@ -83,7 +102,10 @@ public static class ImageSearchParams {
   private String fields=null;
   private int pageNum=1;
   private int fetchSize=100;
+  //查询图片的url
   private String matchPictureUrl;
+  //批量查询图片的url
+  private List<String> matchPictureUrls=Lists.newArrayList();
   //vec or text
   private String searchPolicy=null;
   private int groupNum=1;
@@ -92,7 +114,16 @@ public static class ImageSearchParams {
   //creative or editorial,  contains 'editorial' is editorial, else creative
   private String imageIndexName="vcg_image";
 
+  private String searchType=SearchType.SINGLE.toString();
 
+
+  public String getSearchType() {
+    return searchType;
+  }
+
+  public void setSearchType(String searchType) {
+    this.searchType = searchType;
+  }
 
   @Override public String toString() {
     return "ImageSearchParams{" +
@@ -134,8 +165,17 @@ public static class ImageSearchParams {
     this.groupNum = groupNum;
   }
 
+
   public String getMatchPictureUrl() {
     return matchPictureUrl;
+  }
+
+  public List<String> getMatchPictureUrls() {
+    return matchPictureUrls;
+  }
+
+  public void setMatchPictureUrls(List<String> matchPictureUrls) {
+    this.matchPictureUrls = matchPictureUrls;
   }
 
   public void setMatchPictureUrl(String matchPictureUrl) {
@@ -208,156 +248,219 @@ public static class ImageSearchParams {
 }
    //imageId 不为空，vcg image图片搜索， imageId为空，cNNFeatures不为空，外部图片搜索，
 
+
+
+  public Map<String, Object> batchSearch(ImageSearchParams searchParams) throws Exception {
+    Map<String, Object> finalResults = Maps.newHashMap();
+
+
+
+    List<String> matchPictureUrls=searchParams.getMatchPictureUrls();
+    int batchSize = matchPictureUrls.size();
+    logger.info("start to batch match pictures, batchSize:"+batchSize+"");
+    Stopwatch stopwatch=Stopwatch.createStarted();
+
+
+    //execute batch image search
+     //request image bytes push tpo kafka
+    // MutableTriple triple=new MutableTriple();
+    final List<MutableTriple> imagesTriple=Lists.newArrayList();
+    matchPictureUrls.parallelStream().forEach(new Consumer<String>() {
+      @Override
+      public void accept(String imageUrl) {
+        try{
+         String imageId=fetchImageAndPushToKafka(imageUrl);
+          MutableTriple mutableTriple=new MutableTriple<String,String,String>();
+          mutableTriple.setLeft(imageId);
+          mutableTriple.setMiddle(imageUrl);
+          imagesTriple.add(mutableTriple);
+
+
+        }catch (Exception e){
+          logger.warn("error to fetch "+imageUrl+", errors:"+ExceptionUtil.getExceptionDetailsMessage(e)+"");
+
+        }
+
+
+      }
+    });
+
+    int batchImageFeatureProcessWaitTime=Integer.parseInt(this.settings.getProperty("batchImageFeatureProcessWaitTime"));
+
+
+
+    Thread.currentThread().sleep(batchImageFeatureProcessWaitTime*1000);
+    CacheService<String, String> redisCacheService = ServiceUtils.getCacheService();
+
+
+
+
+//   // String features = redisCacheService.get(imageId);
+//    if(features==null){
+//      throw new  RuntimeException("system error! detail message: image_upload topic not consumed correctly!");
+//
+//    }
+//    logger.debug("search images based on features:" + features + ",using distanceType:"+searchParams.getDistanceType()+"");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    stopwatch.stop();
+    long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
+
+    logger.info("finish to batch match pictures, batchSize:"+batchSize+", taken time: "+timeSeconds+" s");
+
+
+
+
+
+    return finalResults;
+
+  }
+
+
+
    public Map<String, Object> search(String searchParamsStr) throws Exception {
-     Map<String,Object> finalResults= Maps.newHashMap();
+     Map<String, Object> finalResults = Maps.newHashMap();
 
-    ImageSearchParams searchParams=(ImageSearchParams) GsonHelper
-        .jsonToObj(searchParamsStr, ImageSearchParams.class);
-     EsCommonQuery query=null;
+     ImageSearchParams searchParams = (ImageSearchParams) GsonHelper
+             .jsonToObj(searchParamsStr, ImageSearchParams.class);
+     EsCommonQuery query = null;
      //maybe creative or editorial
-     final String indexName=searchParams.getImageIndexName();
-     final String typeName="image";
+     final String indexName = searchParams.getImageIndexName();
+     final String typeName = "image";
 
-     if(searchParams.getImageId()==null&&searchParams.getcNNFeatures()==null&&searchParams.getMatchPictureUrl()==null){
+     if (searchParams.getImageId() == null && searchParams.getcNNFeatures() == null && searchParams.getMatchPictureUrl() == null) {
        //list images
-       int pageNumber=searchParams.getPageNum();
-       int pageSize=searchParams.getFetchSize();
+       int pageNumber = searchParams.getPageNum();
+       int pageSize = searchParams.getFetchSize();
 
 
-       query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("imageId","desc")), Lists.newArrayList("imageId"), indexName, typeName);
-       SubQuery finalSubQuery=new SubQuery();
-       QueryItem queryItem=new QueryItem("groupId",Lists.newArrayList("-1TO100000"));
+       query = new EsCommonQuery(pageNumber, pageSize, Lists.newArrayList(new SortItem("imageId", "desc")), Lists.newArrayList("imageId"), indexName, typeName);
+
+       SubQuery finalSubQuery = new SubQuery();
+       QueryItem queryItem = new QueryItem("groupId", Lists.newArrayList("-1TO100000"));
        finalSubQuery.setQueryItem(queryItem);
        query.setSubQuery(finalSubQuery);
        query.setClusterIdentity(searchParams.getClusterIndentity());
-     }
-     else if(searchParams.getMatchPictureUrl()!=null){
-
-       String imageId = UUID.randomUUID().toString();
-       TopicService topicBytesService = ServiceUtils.getByteTopicService();
-       Stopwatch stopwatch=Stopwatch.createStarted();
+     } else if (searchParams.getMatchPictureUrl() != null) {
 
 
-       //byte[] imageBytes= HttpUtils.executeWithHttpImageUrl(searchParams.getMatchPictureUrl(),null);
-
-       URL url = new URL(searchParams.getMatchPictureUrl());
-
-       byte[] imageBytes = IOUtils.toByteArray(url.openStream());
-       stopwatch.stop();
-       long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
-       logger.info("spent "+timeSeconds+" s to fetch "+searchParams.getMatchPictureUrl()+"");
-       topicBytesService.publishTopicMessage("uploadedImageForSearch", imageId.getBytes(), imageBytes);
-       Thread.currentThread().sleep(3*1000);
+       String imageId = fetchImageAndPushToKafka(searchParams.getMatchPictureUrl());
+       Thread.currentThread().sleep(3 * 1000);
        CacheService<String, String> redisCacheService = ServiceUtils.getCacheService();
        String features = redisCacheService.get(imageId);
-       if(features==null){
-         throw new  RuntimeException("system error! detail message: image_upload topic not consumed correctly!");
+       if (features == null) {
+         throw new RuntimeException("system error! detail message: image_upload topic not consumed correctly!");
 
        }
-       logger.debug("search images based on features:" + features + ",using distanceType:"+searchParams.getDistanceType()+"");
+       logger.debug("search images based on features:" + features + ",using distanceType:" + searchParams.getDistanceType() + "");
 
-      searchParams.setcNNFeatures(features);
-      query=matchedImageBasedOnCNNFeatures(searchParams);
-
-
+       searchParams.setcNNFeatures(features);
+       query = matchedImageBasedOnCNNFeatures(searchParams);
 
 
-
-     }
-     else{
+     } else {
        //已有图搜索
-       if(searchParams.getImageId()!=null){
+       if (searchParams.getImageId() != null) {
          //compare features distance
-         if(searchParams.getSearchPolicy()==null||searchParams.getSearchPolicy().equals("vec")){
-           int pageNumber=1;
-           int pageSize=searchParams.getMatchedTopNum();
+         if (searchParams.getSearchPolicy() == null || searchParams.getSearchPolicy().equals("vec")) {
+           int pageNumber = 1;
+           int pageSize = searchParams.getMatchedTopNum();
 
-           query= new EsCommonQuery(pageNumber,pageSize, Lists.newArrayList(new SortItem("_score","asc")), Lists.newArrayList("imageId"), indexName, typeName);
+           query = new EsCommonQuery(pageNumber, pageSize, Lists.newArrayList(new SortItem("_score", "asc")), Lists.newArrayList("imageId"), indexName, typeName);
            query.setClusterIdentity(searchParams.getClusterIndentity());
-           Map<String,Object> scriptParams= Maps.newHashMap();
-           String cNNFeatures=null;
+           Map<String, Object> scriptParams = Maps.newHashMap();
+           String cNNFeatures = null;
            //get cNNFeatures from index by imageId, also get groupId
-           String[] results=getCNNFeaturesByImageId(searchParams.getImageId(),searchParams);
+           String[] results = getCNNFeaturesByImageId(searchParams.getImageId(), searchParams);
            //groupId filter
 
-          // Integer groupId=getGroupIdBasedOnCNNFeature(cNNFeatures);
-           Integer groupId=Integer.parseInt(results[1]);
-           cNNFeatures=results[0];
-           List<String> groupIds=getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures,searchParams.getGroupNum(),searchParams.getImageIndexName());
+           // Integer groupId=getGroupIdBasedOnCNNFeature(cNNFeatures);
+           Integer groupId = Integer.parseInt(results[1]);
+           cNNFeatures = results[0];
+           List<String> groupIds = getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeatures, searchParams.getGroupNum(), searchParams.getImageIndexName());
 
-           SubQuery finalSubQuery=new SubQuery();
-           if(groupIds!=null){
+           SubQuery finalSubQuery = new SubQuery();
+           if (groupIds != null) {
 
-             QueryItem queryItem=new QueryItem("groupId",groupIds);
+             QueryItem queryItem = new QueryItem("groupId", groupIds);
              finalSubQuery.setQueryItem(queryItem);
            }
            query.setSubQuery(finalSubQuery);
 
-           scriptParams.put("vecStr",cNNFeatures);
-           scriptParams.put("vecStrFieldName","cNNFeatures");
-           scriptParams.put("distanceType",searchParams.getDistanceType());
+           scriptParams.put("vecStr", cNNFeatures);
+           scriptParams.put("vecStrFieldName", "cNNFeatures");
+           scriptParams.put("distanceType", searchParams.getDistanceType());
            query.setScriptLangType("native");
            query.setScriptParams(scriptParams);
            query.setScript("vectors_distance");
          }
 
 
-
        }
        //以图搜图
-       if(searchParams.getcNNFeatures()!=null){
+       if (searchParams.getcNNFeatures() != null) {
          query = matchedImageBasedOnCNNFeatures(searchParams);
 
        }
 
      }
-     List<Map<String,Object>> results=null;
+     List<Map<String, Object>> results = null;
      //EsQueryGenerator.EsQueryWrapper esQueryWrapper= new EsQueryGenerator().generateFinalQuery(query);
      //features full text search
-     if(searchParams.getSearchPolicy()!=null&&searchParams.getSearchPolicy().equals("text")){
-       String cNNFeaturesText=getCNNFeaturesTextByImageId(searchParams.getImageId(),searchParams);
-      results =matchCNNFeatures(cNNFeaturesText,searchParams.getMatchedTopNum());
+     if (searchParams.getSearchPolicy() != null && searchParams.getSearchPolicy().equals("text")) {
+       String cNNFeaturesText = getCNNFeaturesTextByImageId(searchParams.getImageId(), searchParams);
+       results = matchCNNFeatures(cNNFeaturesText, searchParams.getMatchedTopNum());
 
 
-
-
-
-     }
-     else{
-       results= queryService.processQuery(query);
+     } else {
+       results = queryService.processQuery(query);
      }
 
 
      //populate image url
-     final List<String> imageIds=Lists.newArrayList();
+     final List<String> imageIds = Lists.newArrayList();
      results.forEach(new Consumer<Map<String, Object>>() {
-       @Override public void accept(Map<String, Object> stringObjectMap) {
-         imageIds.add((String)stringObjectMap.get("imageId"));
+       @Override
+       public void accept(Map<String, Object> stringObjectMap) {
+         imageIds.add((String) stringObjectMap.get("imageId"));
        }
      });
-     if(searchParams.getFields()==null||searchParams.getFields().contains("url")){
-       Map<String,String> idUrlMap=getImageUrlInfo(imageIds);
+     if (searchParams.getFields() == null || searchParams.getFields().contains("url")) {
+       Map<String, String> idUrlMap = getImageUrlInfo(imageIds);
 
        results.forEach(new Consumer<Map<String, Object>>() {
-         @Override public void accept(Map<String, Object> stringObjectMap) {
-           String url=idUrlMap.get(stringObjectMap.get("imageId"));
-           if(url==null){
-             url="";
+         @Override
+         public void accept(Map<String, Object> stringObjectMap) {
+           String url = idUrlMap.get(stringObjectMap.get("imageId"));
+           if (url == null) {
+             url = "";
            }
-           stringObjectMap.put("url",url);
+           stringObjectMap.put("url", url);
          }
        });
-     }
-   else {
-      //results= results.parallelStream().map(map -> map.put("imageId",Integer.parseInt((String)map.get("imageId"))+600000000) ).;
+     } else {
+       //results= results.parallelStream().map(map -> map.put("imageId",Integer.parseInt((String)map.get("imageId"))+600000000) ).;
 
        results.forEach(new Consumer<Map<String, Object>>() {
          @Override
          public void accept(Map<String, Object> map) {
-           if(!indexName.contains("editorial")){
+           if (!indexName.contains("editorial")) {
              // change imageId if creative image
 
-             map.put("imageId",Integer.parseInt((String)map.get("imageId"))+600000000);
+             map.put("imageId", Integer.parseInt((String) map.get("imageId")) + 600000000);
            }
 
 
@@ -366,23 +469,38 @@ public static class ImageSearchParams {
      }
 
 
-    
+     finalResults.put("result", results);
+     if (results.size() > 0) {
 
-
-     finalResults.put("result",results);
-     if(results.size()>0){
-
-       double score=Double.parseDouble(String.valueOf(results.get(0).get("score")==null?0:results.get(0).get("score")));
-       if(score<=searchParams.getScoreThresholdValue()){
-         finalResults.put("sameImageId",results.get(0).get("imageId"));
+       double score = Double.parseDouble(String.valueOf(results.get(0).get("score") == null ? 0 : results.get(0).get("score")));
+       if (score <= searchParams.getScoreThresholdValue()) {
+         finalResults.put("sameImageId", results.get(0).get("imageId"));
 
        }
 
      }
 
 
+     return finalResults;
+   }
 
-    return finalResults;
+  private String fetchImageAndPushToKafka(String imageUrl) throws IOException {
+    String imageId = UUID.randomUUID().toString();
+    TopicService topicBytesService = ServiceUtils.getByteTopicService();
+    Stopwatch stopwatch=Stopwatch.createStarted();
+
+
+    //byte[] imageBytes= HttpUtils.executeWithHttpImageUrl(searchParams.getMatchPictureUrl(),null);
+
+    URL url = new URL(imageUrl);
+
+    byte[] imageBytes = IOUtils.toByteArray(url.openStream());
+    stopwatch.stop();
+    long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
+    logger.info("spent "+timeSeconds+" s to fetch "+imageUrl+"");
+    topicBytesService.publishTopicMessage("uploadedImageForSearch", imageId.getBytes(), imageBytes);
+
+    return imageId;
   }
 
   private EsCommonQuery matchedImageBasedOnCNNFeatures(ImageSearchParams searchParams) throws Exception {
@@ -404,6 +522,13 @@ public static class ImageSearchParams {
 
      QueryItem queryItem=new QueryItem("groupId",groupIds);
       finalSubQuery.setQueryItem(queryItem);
+      String[] groupIds_=new String[groupIds.size()];
+      for(int i=0;i<groupIds.size();i++){
+        groupIds_[i]=groupIds.get(i);
+
+
+      }
+      query.setRoutings(groupIds_);
     }
     query.setSubQuery(finalSubQuery);
 

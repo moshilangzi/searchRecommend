@@ -19,6 +19,7 @@ public class EsCommonQuery extends CommonQuery {
     
     private String index = null;
     private String type = null;
+    private String[] routings=null;
 
 
 
@@ -89,6 +90,14 @@ public class EsCommonQuery extends CommonQuery {
 
     public void setScript(String script) {
         this.script = script;
+    }
+
+    public String[] getRoutings() {
+        return routings;
+    }
+
+    public void setRoutings(String[] routings) {
+        this.routings = routings;
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 /**
  * Created by jasstion on 21/04/2017.
+ *
  */
 public class Image implements Serializable {
 

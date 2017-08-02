@@ -11,6 +11,8 @@ import com.comm.sr.service.cache.CacheService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.yufei.utils.StringUtils;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -116,8 +118,13 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
         TransportClient client=clientMap.get(clusteridentity);
         List<Map<String, Object>> results = Lists.newArrayList();
         EsQueryGenerator.EsQueryWrapper  esQueryWrapper=new EsQueryGenerator().generateFinalQuery(baiheQuery);
-        SearchResponse searchResponse=client.prepareSearch().setSource(esQueryWrapper.getSearchSourceBuilder().toString()).setIndices(esQueryWrapper.getIndexName())
-                .execute().actionGet();
+        SearchRequestBuilder searchRequestBuilder=client.prepareSearch().setSource(esQueryWrapper.getSearchSourceBuilder().toString()).setIndices(esQueryWrapper.getIndexName());
+        if(!StringUtils.isEmpty(baiheQuery.getRoutings())){
+            searchRequestBuilder.setRouting(baiheQuery.getRoutings());
+
+        }
+
+        SearchResponse searchResponse=searchRequestBuilder.execute().actionGet();
         SearchHits searchHits=searchResponse.getHits();
         long totalCount=searchHits.getTotalHits();
         for (SearchHit hit : searchHits.getHits()) {

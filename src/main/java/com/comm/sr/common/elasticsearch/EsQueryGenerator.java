@@ -203,6 +203,8 @@ public class EsQueryGenerator implements QueryGenerator<EsQueryGenerator.EsQuery
         }
         searchSourceBuilder.fetchSource(includeFields, null);
 
+
+
         String finalQuery = searchSourceBuilder.toString();
         LOGGER.debug(finalQuery);
         EsQueryWrapper esQueryWrapper=new EsQueryWrapper(index,searchSourceBuilder,type);
