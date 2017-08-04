@@ -121,8 +121,10 @@ public class EsQueryService extends AbstractQueryService<EsCommonQuery> {
         SearchRequestBuilder searchRequestBuilder=client.prepareSearch().setSource(esQueryWrapper.getSearchSourceBuilder().toString()).setIndices(esQueryWrapper.getIndexName());
         if(!StringUtils.isEmpty(baiheQuery.getRoutings())){
             searchRequestBuilder.setRouting(baiheQuery.getRoutings());
+            logger.debug("routing values:"+baiheQuery.getRoutings().toString()+"");
 
         }
+        logger.debug(searchRequestBuilder.toString());
 
         SearchResponse searchResponse=searchRequestBuilder.execute().actionGet();
         SearchHits searchHits=searchResponse.getHits();

@@ -16,6 +16,7 @@ import com.comm.sr.service.topic.TopicService;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.yufei.utils.CommonUtil;
 import com.yufei.utils.ExceptionUtil;
 import com.yufei.utils.StringUtils;
 import org.apache.commons.io.IOUtils;
@@ -94,6 +95,7 @@ public class VcgImageSearchService extends AbstractComponent{
   }
 
 public static class ImageSearchParams {
+  private String useRouting="no";
   private String distanceType=null;
   private String cNNFeatures=null;
   private String imageId=null;
@@ -165,6 +167,13 @@ public static class ImageSearchParams {
     this.groupNum = groupNum;
   }
 
+  public String getUseRouting() {
+    return useRouting;
+  }
+
+  public void setUseRouting(String useRouting) {
+    this.useRouting = useRouting;
+  }
 
   public String getMatchPictureUrl() {
     return matchPictureUrl;
@@ -522,13 +531,17 @@ public static class ImageSearchParams {
 
      QueryItem queryItem=new QueryItem("groupId",groupIds);
       finalSubQuery.setQueryItem(queryItem);
-      String[] groupIds_=new String[groupIds.size()];
-      for(int i=0;i<groupIds.size();i++){
-        groupIds_[i]=groupIds.get(i);
+      if(searchParams.getUseRouting().equals("yes")){
+        String[] groupIds_=new String[groupIds.size()];
+        for(int i=0;i<groupIds.size();i++){
+          groupIds_[i]=groupIds.get(i);
 
+
+        }
+        query.setRoutings(groupIds_);
 
       }
-      query.setRoutings(groupIds_);
+
     }
     query.setSubQuery(finalSubQuery);
 
@@ -609,8 +622,8 @@ public static class ImageSearchParams {
   protected  final static Map<String,KDTree<Integer>> kdTrees=Maps.newHashMap();
 
 //
-//  private List<String> getGroupIdsBasedOnCNNFeatureUsingKdTree(String cNNFeature,int groupNum) throws Exception {
-//    return getGroupIdsBasedOnCNNFeatureUsingKdTree(cNNFeature,groupNum,null);
+//  private List<String> (String cNNFeature,int groupNum) throws Exception {
+//    return (cNNFeature,groupNum,null);
 //  }
   private List<String> getGroupIdsBasedOnCNNFeatureUsingKdTree(String cNNFeature,int groupNum,String indexName) throws Exception {
 
@@ -658,8 +671,12 @@ public static class ImageSearchParams {
 
 
 
-      double[] vec = Lists.newArrayList(cNNFeature.split(",")).parallelStream()
+//      double[] vec = Lists.newArrayList(cNNFeature.split(",")).parallelStream()
+//              .mapToDouble(va -> Double.parseDouble(va)).toArray();
+      double[] vec = Lists.newArrayList(cNNFeature.split(",")).parallelStream().map(va -> String.valueOf(Math.round(Double.parseDouble(va) * 1000) / 1000.00))
               .mapToDouble(va -> Double.parseDouble(va)).toArray();
+
+
       groupIds=kdTree.nearest(vec,groupNum).stream().map(val -> String.valueOf(val)).collect(Collectors.toList());
       stopwatch.stop();
       long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
