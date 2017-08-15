@@ -80,6 +80,16 @@ public class ServiceUtils {
 
 
   }
+  protected static VcgImageUpdateService vcgImageUpdateService=null;
+  public static VcgImageUpdateService getVcgImageUpdateService(){
+          if(vcgImageUpdateService==null){
+            vcgImageUpdateService =new VcgImageUpdateService(settings,getQueryService(),getCacheService(),getByteTopicService());
+
+          }
+    return vcgImageUpdateService;
+
+
+  }
   public static VcgBasedSearchService getVcgOnlineMockServicee(){
     VcgOnlineMockService vcgSearchService=new VcgOnlineMockService(settings,getKeywordService(),getQueryService());
     return vcgSearchService;

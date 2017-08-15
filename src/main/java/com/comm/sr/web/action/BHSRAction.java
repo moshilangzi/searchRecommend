@@ -14,6 +14,7 @@ import com.comm.sr.service.cache.CacheService;
 import com.comm.sr.service.topic.TopicService;
 import com.comm.sr.service.vcg.VcgBasedSearchService;
 import com.comm.sr.service.vcg.VcgImageSearchService;
+import com.comm.sr.service.vcg.VcgImageUpdateService;
 import com.yufei.utils.ExceptionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -191,37 +192,22 @@ public class BHSRAction {
 
 
     @RequestMapping(value = "/addImagesByUrl", method = RequestMethod.GET)
-    public void addImagesByUrl(@RequestParam("images") String newImagesJsonInfo ,HttpServletRequest request,HttpServletResponse response)
+    public void addImagesByUrl(@RequestParam("params") String params ,HttpServletRequest request,HttpServletResponse response)
             throws IOException {
-        //send image bytes to kafka also generate imageId, later get image features from redis by imageId,then search most similirity images from elastic
         UUID uuid = UUID.randomUUID();
         //每次服务请求对应的唯一id
         String uuidStr = uuid.toString();
         ThreadShardEntity threadShardEntity_=new ThreadShardEntity(uuidStr);
         Constants.threadShardEntity.set(threadShardEntity_);
         TopicService topicService=ServiceUtils.getTopicService();
-        final String topicName=request.getParameter("ImageUpdatedTopic");
         int code = 200;
         String msg = "正常调用";
         Object data = null;
         try {
-            List<Image> images= JSON.parseObject(newImagesJsonInfo,new TypeReference<List<Image>>(){
-
-            });
-
-            images.parallelStream().forEach(new Consumer<Image>() {
-                @Override
-                public void accept(Image image) {
-                    //push image stream to kafka
-
-                    String imageUrl=image.getUrl();
-                    String imageId=image.getImageId();
-                    topicService.publishTopicMessage(topicName,imageId,imageUrl);
+            VcgImageUpdateService vcgImageUpdateService=ServiceUtils.getVcgImageUpdateService();
+            vcgImageUpdateService.batchAddImages(params);
 
 
-
-                }
-            });
 
 
 
