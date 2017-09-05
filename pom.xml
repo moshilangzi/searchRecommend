@@ -14,37 +14,37 @@
 
 
 </distributionManagement>
-    <repositories>
-        <repository>
-            <id>nexusServer</id>
-            <name>nexus distribution snapshot repository</name>
-            <url>https://mvnrepository.com/artifact/io.netty/netty-handler</url>
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<id>nexusServer</id>-->
+            <!--<name>nexus distribution snapshot repository</name>-->
+            <!--<url>https://mvnrepository.com/artifact/io.netty/netty-handler</url>-->
 
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>nettyServer</id>
-            <name>nexus distribution snapshot repository</name>
-            <url>https://mvnrepository.com/artifact/io.netty/netty-all</url>
+            <!--<snapshots>-->
+                <!--<enabled>true</enabled>-->
+            <!--</snapshots>-->
+        <!--</repository>-->
+        <!--<repository>-->
+            <!--<id>nettyServer</id>-->
+            <!--<name>nexus distribution snapshot repository</name>-->
+            <!--<url>https://mvnrepository.com/artifact/io.netty/netty-all</url>-->
 
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>central</id>
-            <url>https://repo1.maven.org/maven2</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>cloudera</id>
-            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-        </repository>
-    </repositories>
+            <!--<snapshots>-->
+                <!--<enabled>true</enabled>-->
+            <!--</snapshots>-->
+        <!--</repository>-->
+        <!--<repository>-->
+            <!--<id>central</id>-->
+            <!--<url>https://repo1.maven.org/maven2</url>-->
+            <!--<releases>-->
+                <!--<enabled>true</enabled>-->
+            <!--</releases>-->
+        <!--</repository>-->
+        <!--<repository>-->
+            <!--<id>cloudera</id>-->
+            <!--<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>-->
+        <!--</repository>-->
+    <!--</repositories>-->
     <pluginRepositories>
         <pluginRepository>
             <id>central</id>

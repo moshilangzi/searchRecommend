@@ -2,7 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../../baihe_work/baihe-analysis/baihe-analysis.iml" filepath="$PROJECT_DIR$/../../baihe_work/baihe-analysis/baihe-analysis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../my_work/dataTools/dataTools.iml" filepath="$PROJECT_DIR$/../../my_work/dataTools/dataTools.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../my_work/datacenter/datacenter.iml" filepath="$PROJECT_DIR$/../../my_work/datacenter/datacenter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../my_work/dl4j-examples/deeplearning4j-examples-parent.iml" filepath="$PROJECT_DIR$/../../my_work/dl4j-examples/deeplearning4j-examples-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-zoo/deeplearning4j-zoo.iml" filepath="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-zoo/deeplearning4j-zoo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../my_work/dl4j-examples/dl4j-examples/dl4j-examples.iml" filepath="$PROJECT_DIR$/../../my_work/dl4j-examples/dl4j-examples/dl4j-examples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../my_work/elasticsearch-payload/elastic-payload.iml" filepath="$PROJECT_DIR$/../../my_work/elasticsearch-payload/elastic-payload.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../my_work/lang-javascript/lang-javascript.iml" filepath="$PROJECT_DIR$/../../my_work/lang-javascript/lang-javascript.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../my_work/dl4j-examples/lstm-hdfs/lstm-hdfs.iml" filepath="$PROJECT_DIR$/../../my_work/dl4j-examples/lstm-hdfs/lstm-hdfs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../my_work/dl4j-examples/nd4j-examples/nd4j-examples.iml" filepath="$PROJECT_DIR$/../../my_work/dl4j-examples/nd4j-examples/nd4j-examples.iml" />
       <module fileurl="file://$PROJECT_DIR$/searchRecommend.iml" filepath="$PROJECT_DIR$/searchRecommend.iml" />
     </modules>
   </component>

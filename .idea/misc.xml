@@ -9,9 +9,6 @@
     <option name="pathToConfigFileJava" value="$USER_HOME$/Downloads/hbase_eclipse_formatter.xml" />
     <option name="selectedJavaProfile" value="'HBase Apache Current'" />
   </component>
-  <component name="EntryPointsManager">
-    <entry_points version="2.0" />
-  </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/../../baihe_work/baihe-analysis" />
     <file type="web" url="file://$PROJECT_DIR$" />
@@ -21,39 +18,65 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/../../baihe_work/baihe-analysis/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/dl4j-examples/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/elasticsearch-payload/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/lang-javascript/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/datacenter/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/dataTools/pom.xml" />
       </list>
     </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-core/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-cuda/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-graph/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-keras/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-modelimport/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nearestneighbors-parent/deeplearning4j-nearestneighbor-server/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nearestneighbors-parent/deeplearning4j-nearestneighbors-client/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nearestneighbors-parent/deeplearning4j-nearestneighbors-model/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nearestneighbors-parent/nearestneighbor-core/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nearestneighbors-parent/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nlp-parent/deeplearning4j-nlp-chinese/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nlp-parent/deeplearning4j-nlp-japanese/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nlp-parent/deeplearning4j-nlp-korean/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nlp-parent/deeplearning4j-nlp-uima/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nlp-parent/deeplearning4j-nlp/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nlp-parent/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-nn/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/deeplearning4j-aws/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/deeplearning4j-scaleout-parallelwrapper-parameter-server/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/deeplearning4j-scaleout-parallelwrapper/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/dl4j-streaming/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/spark/dl4j-spark-ml/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/spark/dl4j-spark-nlp-java8/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/spark/dl4j-spark-nlp/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/spark/dl4j-spark-parameterserver/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/spark/dl4j-spark/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-scaleout/spark/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-ui-parent/deeplearning4j-play/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-ui-parent/deeplearning4j-ui-components/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-ui-parent/deeplearning4j-ui-model/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-ui-parent/deeplearning4j-ui-remote-iterationlisteners/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-ui-parent/deeplearning4j-ui-resources/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-ui-parent/deeplearning4j-ui/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/deeplearning4j-ui-parent/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/deeplearning4j/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/dl4j-examples/arbiter-examples/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/dl4j-examples/datavec-examples/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/dl4j-examples/dl4j-cuda-specific-examples/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/dl4j-examples/dl4j-spark-examples/dl4j-spark/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/dl4j-examples/dl4j-spark-examples/pom.xml" />
+        <option value="$PROJECT_DIR$/../../my_work/dl4j-examples/rl4j-examples/pom.xml" />
+      </set>
+    </option>
   </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
-    <OptionsSetting value="true" id="Add" />
-    <OptionsSetting value="true" id="Remove" />
-    <OptionsSetting value="true" id="Checkout" />
-    <OptionsSetting value="true" id="Update" />
-    <OptionsSetting value="true" id="Status" />
-    <OptionsSetting value="true" id="Edit" />
-    <ConfirmationsSetting value="0" id="Add" />
-    <ConfirmationsSetting value="0" id="Remove" />
-  </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="SvnBranchConfigurationManager">
     <option name="mySupportsUserInfoFilter" value="true" />
-  </component>
-  <component name="masterDetails">
-    <states>
-      <state key="ProjectJDKs.UI">
-        <settings>
-          <last-edited>1.8</last-edited>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-    </states>
   </component>
 </project>

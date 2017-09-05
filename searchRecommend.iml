@@ -18,7 +18,7 @@
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -87,13 +87,13 @@
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-analyzers-common:5.5.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queryparser:5.5.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-sandbox:5.5.2" level="project" />
-    <orderEntry type="library" name="Maven: org.elasticsearch.plugin:lang-javascript:2.4.1-SNAPSHOT" level="project" />
+    <orderEntry type="module" module-name="lang-javascript" />
     <orderEntry type="library" name="Maven: org.mozilla:rhino:1.7.7" level="project" />
     <orderEntry type="library" name="Maven: org.hibernate:hibernate-validator:5.2.2.Final" level="project" />
     <orderEntry type="library" name="Maven: javax.validation:validation-api:1.1.0.Final" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.logging:jboss-logging:3.2.1.Final" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml:classmate:1.1.0" level="project" />
-    <orderEntry type="library" name="Maven: org.elasticsearch.plugin:elastic-payload:1.0.0" level="project" />
+    <orderEntry type="module" module-name="elastic-payload" />
     <orderEntry type="library" name="Maven: io.searchbox:jest:2.0.0" level="project" />
     <orderEntry type="library" name="Maven: io.searchbox:jest-common:2.0.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore-nio:4.4.4" level="project" />
