@@ -35,6 +35,7 @@ import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +74,9 @@ public class VcgImageSearchService extends AbstractComponent{
 
     this.sql2o= new Sql2o(mysqlUrl,mysqlUserName,mysqlPasswd);
     this.bytesTopicService=bytesTopicService;
+
+    //initinal kdtree
+
 
 
 
@@ -503,7 +507,11 @@ public static class ImageSearchParams {
 
     URL url = new URL(imageUrl);
 
-    byte[] imageBytes = IOUtils.toByteArray(url.openStream());
+    InputStream imageStream=url.openStream();
+
+    byte[] imageBytes = IOUtils.toByteArray(imageStream);
+    imageStream.close();
+
     stopwatch.stop();
     long timeSeconds=stopwatch.elapsed(TimeUnit.MILLISECONDS)/1000;
     logger.info("spent "+timeSeconds+" s to fetch "+imageUrl+"");
@@ -625,7 +633,8 @@ public static class ImageSearchParams {
 //  private List<String> (String cNNFeature,int groupNum) throws Exception {
 //    return (cNNFeature,groupNum,null);
 //  }
-  private List<String> getGroupIdsBasedOnCNNFeatureUsingKdTree(String cNNFeature,int groupNum,String indexName) throws Exception {
+
+  private synchronized List<String>  getGroupIdsBasedOnCNNFeatureUsingKdTree(String cNNFeature,int groupNum,String indexName) throws Exception {
 
     if(groupNum>10){
       groupNum=10;
@@ -645,19 +654,20 @@ public static class ImageSearchParams {
     KDTree<Integer> kdTree =kdTrees.get(preKey);
 
     if(kdTree==null){
-      if(this.cacheService!=null){
-        kdTree=new KDTree<Integer>(2048);
+        if (this.cacheService != null) {
+          kdTree = new KDTree<Integer>(2048);
 
-        for(int i=0;i<clusterNum;i++){
-          String key=preKey+i;
-          String vecStr=cacheService.get(key);
-          double[] vec = Lists.newArrayList(vecStr.split(",")).parallelStream()
-                  .mapToDouble(va -> Double.parseDouble(va)).toArray();
-          kdTree.insert(vec,i);
+          for (int i = 0; i < clusterNum; i++) {
+            String key = preKey + i;
+            String vecStr = cacheService.get(key);
+            double[] vec = Lists.newArrayList(vecStr.split(",")).parallelStream()
+                    .mapToDouble(va -> Double.parseDouble(va)).toArray();
+            kdTree.insert(vec, i);
 
 
-        }
-        kdTrees.put(preKey,kdTree);
+          }
+          kdTrees.put(preKey, kdTree);
+
 
       }
 
